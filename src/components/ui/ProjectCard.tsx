@@ -12,6 +12,7 @@ export function ProjectMedia({ project, sizes, priority = false }: { project: Pr
       fill
       sizes={sizes}
       priority={priority}
+      style={project.imagePosition ? { objectPosition: project.imagePosition } : undefined}
       className="object-cover"
     />
   ) : (

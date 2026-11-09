@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/data/projects";
 import { ProjectMedia } from "@/components/ui/ProjectCard";
 import { Reveal } from "@/components/ui/Reveal";
+import { Gallery } from "@/components/ui/Gallery";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@/components/ui/Icons";
 
 type Params = { slug: string };
@@ -80,7 +82,19 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
 
         <Reveal delay={100} className="mt-14">
           <div className="relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-line/60 bg-stone md:aspect-[16/8]">
-            <ProjectMedia project={project} sizes="100vw" priority />
+            {project.hero ? (
+              <Image
+                src={project.hero.src}
+                alt={project.hero.alt}
+                fill
+                priority
+                sizes="100vw"
+                style={project.hero.position ? { objectPosition: project.hero.position } : undefined}
+                className="object-cover"
+              />
+            ) : (
+              <ProjectMedia project={project} sizes="100vw" priority />
+            )}
           </div>
         </Reveal>
 
@@ -139,6 +153,20 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
             )}
           </div>
         </div>
+
+        {project.gallery && project.gallery.length > 0 && (
+          <section aria-labelledby="photos-title" className="mt-24">
+            <Reveal className="mb-8 flex items-end justify-between gap-6 border-b border-line pb-4">
+              <h2 id="photos-title" className="eyebrow">
+                Photos
+              </h2>
+              <span className="font-mono text-xs text-muted">{project.gallery.length} photos · click to enlarge</span>
+            </Reveal>
+            <Reveal>
+              <Gallery photos={project.gallery} />
+            </Reveal>
+          </section>
+        )}
 
         {/* Next project */}
         {next && next.slug !== project.slug && (

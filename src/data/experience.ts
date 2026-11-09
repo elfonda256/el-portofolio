@@ -1,4 +1,5 @@
 import type { TimelineItem } from "./types";
+import { library as ph } from "./photos";
 
 /** Work experience, newest first. Source: CV. */
 export const experience: TimelineItem[] = [
@@ -28,6 +29,7 @@ export const experience: TimelineItem[] = [
       "Monitored water flow, water levels, climatology and environmental parameters in real time, working with hydrology, automation and GIS teams.",
     ],
     tags: ["Modbus", "MQTT", "GSM", "Telemetry", "Telecontrol"],
+    photos: [ph.weatherSensor, ph.jointInspection, ph.rimpPresentation],
   },
   {
     title: "Research & Development Intern",
@@ -40,8 +42,10 @@ export const experience: TimelineItem[] = [
       "Trained YOLO object detection models with PyTorch and TensorFlow; optimized with TensorRT on Jetson Nano / Orin Nano (≈47–60 FPS).",
       "Participated in R&D of autonomous systems, including automated guided vehicles (AGVs).",
       "Analyzed work-equipment data and defined and reported engineering KPIs to executive management.",
+      "Presented the AMR to the director and head of Yayasan Toyota Indonesia.",
     ],
     tags: ["ROS", "SLAM", "YOLO", "TensorRT", "Jetson"],
+    photos: [ph.amrPresentation, ph.amrLoadTest, ph.presdirTmmin],
   },
 ];
 

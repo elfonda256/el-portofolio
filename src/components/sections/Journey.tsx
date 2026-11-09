@@ -3,6 +3,7 @@ import { education, experience } from "@/data/experience";
 import { skillGroups } from "@/data/skills";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
+import { Gallery } from "@/components/ui/Gallery";
 
 function Timeline({ items }: { items: TimelineItem[] }) {
   return (
@@ -43,6 +44,7 @@ function Timeline({ items }: { items: TimelineItem[] }) {
                 ))}
               </ul>
             )}
+            {item.photos && item.photos.length > 0 && <Gallery photos={item.photos} variant="thumbs" className="mt-6" />}
           </Reveal>
         </li>
       ))}

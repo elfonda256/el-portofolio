@@ -1,4 +1,5 @@
 import type { SocialLink } from "./types";
+import { library } from "./photos";
 
 /**
  * Personal information & contact — the single source of truth for identity.
@@ -74,24 +75,10 @@ export const photos = {
     height: 1280,
     note: "on site ✦",
   },
-  /** Photo band after the introduction. */
+  /** Photo band after the introduction (from the photo library). */
   band: [
-    {
-      src: "/images/field-presenting-rimp.jpg",
-      alt: "Elfano presenting the telemetering system of the Rentang Irrigation Modernization Project on stage",
-      width: 2000,
-      height: 1500,
-      caption: "Presenting the telemetering system",
-      context: "Rentang Irrigation Modernization Project",
-    },
-    {
-      src: "/images/field-station.jpg",
-      alt: "Elfano in a hard hat and safety vest giving a thumbs up in front of a fenced field station beside an irrigation canal",
-      width: 1280,
-      height: 960,
-      caption: "In the field",
-      context: "Site visit",
-    },
+    { ...library.rimpPresentation, context: "Rentang Irrigation Modernization Project" },
+    { ...library.fieldStation, context: "Site visit" },
   ],
 } as const;
 

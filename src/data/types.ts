@@ -24,6 +24,19 @@ export type CoverArt =
   | "robot"
   | "placeholder";
 
+/** A real photo or screenshot stored in /public. */
+export interface Photo {
+  src: string;
+  alt: string;
+  /** Short caption shown under the photo. */
+  caption: string;
+  /** Real pixel size of the file. */
+  width: number;
+  height: number;
+  /** CSS object-position used when the photo is cropped, e.g. "50% 30%". */
+  position?: string;
+}
+
 export interface ProjectLink {
   label: string;
   href: string;
@@ -44,9 +57,15 @@ export interface Project {
   stack: string[];
   links?: ProjectLink[];
   cover: CoverArt;
-  /** Optional real image in /public, e.g. "/images/projects/catering.jpg". */
+  /** Optional real image in /public, e.g. "/images/projects/catering.jpg". Replaces the illustration. */
   image?: string;
   imageAlt?: string;
+  /** CSS object-position for the cover crop, e.g. "50% 30%". */
+  imagePosition?: string;
+  /** Wide photo at the top of the project page (defaults to `image`). Pick a landscape one. */
+  hero?: Photo;
+  /** Photos shown on the project page. */
+  gallery?: Photo[];
   /** Show on the home page grid. */
   featured?: boolean;
   /** Marks unfinished entries so they're labelled clearly on the site. */
@@ -62,6 +81,8 @@ export interface TimelineItem {
   description?: string;
   points: string[];
   tags?: string[];
+  /** Small photos shown under the entry. */
+  photos?: Photo[];
 }
 
 export interface SkillGroup {

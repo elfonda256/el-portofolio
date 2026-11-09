@@ -29,6 +29,7 @@ All content lives in `src/data/` — you shouldn't need to touch components to u
 | `skills.ts` | Core skills (About) and grouped technical skills |
 | `services.ts` | Products & services cards |
 | `content.ts` | Latest Content — featured YouTube video |
+| `photos.ts` | Photo library: every real photo with its caption and crop |
 
 ### Common changes
 
@@ -45,8 +46,10 @@ All content lives in `src/data/` — you shouldn't need to touch components to u
 - **Swap the portrait** — replace `public/images/elfano-cutout.png` (transparent PNG, used in the hero)
   and `public/images/elfano-portrait.jpg` (social share image). A higher-resolution photo (≥1200px tall)
   will look sharper on large screens; keep the cut-out's background transparent so the name can sit behind it.
-- **Photos** — personal photos and their captions are in `photos` in `site.ts`
-  (About photo + the two-photo band after the introduction). Files live in `public/images/field-*.jpg`.
+- **Photos** — every real photo is defined once in `src/data/photos.ts` (file, caption, alt text,
+  crop position). Projects use them as `image` (card cover), `hero` (wide photo on the project page)
+  and `gallery` (photos with a lightbox); timeline entries use `photos`; the About photo and the band
+  after the introduction are in `photos` in `site.ts`. Project photos live in `public/images/projects/`.
 - **Availability** — `profile.availability` in `site.ts` (set `open: false` to hide the green indicator).
 
 ## Structure
@@ -64,7 +67,7 @@ src/
   components/
     layout/   Navbar (floating, sticky, mobile menu, active section), Footer
     sections/ Hero, Intro, FieldBand, LatestContent, Portfolio, About, Journey, Services, Contact
-    ui/       Reveal, SectionHeading, ProjectCard, ProjectCover (SVG illustrations), SocialLinks, Icons
+    ui/       Reveal, SectionHeading, Gallery (lightbox), ProjectCard, ProjectCover (SVG illustrations), SocialLinks, Icons
   data/      all editable content (see above)
 ```
 
