@@ -95,4 +95,73 @@ export const library = {
     height: 634,
     position: "35% 40%",
   },
+
+  // ── Enterprise Catering Platform (ZKS Catering) ──────────────
+  zksDashboard: {
+    src: "/images/projects/zks-dashboard-logistik.jpg",
+    alt: "Operations and dispatch console dashboard with central kitchen capacity tracking and logistics orders",
+    caption: "Operations and dispatch console dashboard",
+    width: 1024,
+    height: 640,
+  },
+  zksInventory: {
+    src: "/images/projects/zks-inventory-warehouse.jpg",
+    alt: "Command center inventory and warehouse dashboard showing stock value and material throughput",
+    caption: "Inventory command center and warehouse management",
+    width: 1024,
+    height: 640,
+  },
+  zksProduction: {
+    src: "/images/projects/zks-production-bom.jpg",
+    alt: "Central kitchen production schedule and bill of materials with work orders",
+    caption: "Production scheduling & Bill of Materials (BOM)",
+    width: 1024,
+    height: 640,
+  },
+  zksKitchen: {
+    src: "/images/projects/zks-kitchen-kds.jpg",
+    alt: "Kitchen Display System (KDS) console with station dispatch queues and HACCP compliance",
+    caption: "Kitchen Display System (KDS) & HACCP monitoring",
+    width: 1024,
+    height: 640,
+  },
+  zksProcurement: {
+    src: "/images/projects/zks-procurement-pr.jpg",
+    alt: "Enterprise procurement workspace with smart purchase request recommendations and approval workflow",
+    caption: "Smart procurement recommendations & PR workflow",
+    width: 1024,
+    height: 640,
+  },
+  zksPurchaseOrders: {
+    src: "/images/projects/zks-purchase-orders.jpg",
+    alt: "Purchase order lifecycle tracking and 4-tier chain of procurement approval",
+    caption: "Purchase order management & 4-tier approval chain",
+    width: 1024,
+    height: 640,
+  },
+  zksMenuCatalog: {
+    src: "/images/projects/zks-menu-catalog.jpg",
+    alt: "Customer-facing balanced nutrition menu catalog with daily shift rotation",
+    caption: "Customer portal & daily menu rotation",
+    width: 1024,
+    height: 618,
+  },
+
+  // ── Pancalingga Website ───────────────────────────────────────
+  pancalinggaHero: {
+    src: "/images/projects/pancalingga-hero.jpg",
+    alt: "PT Panca Lingga Perkasa corporate website hero and portfolio section",
+    caption: "Corporate website homepage & service showcase",
+    width: 1024,
+    height: 640,
+  },
+
+  // ── Rentang Telemetry & IoT ──────────────────────────────────
+  telemetryWmsDashboard: {
+    src: "/images/projects/telemetry-wms-dashboard.jpg",
+    alt: "Rentang Irrigation Monitoring Application WMS Integration telemetry station list and sensor telemetry readings",
+    caption: "Rentang WMS telemetry monitoring web dashboard",
+    width: 1024,
+    height: 640,
+  },
 } satisfies Record<string, Photo>;
