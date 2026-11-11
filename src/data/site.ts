@@ -129,8 +129,16 @@ export const navigation = [
 ] as const;
 
 export const site = {
-  /** Set NEXT_PUBLIC_SITE_URL in production for correct canonical/OG URLs. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  /**
+   * Canonical/OG base URL. Order: NEXT_PUBLIC_SITE_URL (set this when a custom
+   * domain is added) → Vercel's production domain (provided automatically at
+   * build time) → the current live URL.
+   */
+  url:
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "https://el-portofolio-five.vercel.app"),
   description:
     "Portfolio of Elfano Sultan Syahbana — Automation & Software Engineer working across Industrial IoT, robotics, applied AI and enterprise software. Based in Karawang, Indonesia.",
   keywords: [
