@@ -1,3 +1,4 @@
+import { sectionIndex } from "@/data/site";
 import type { TimelineItem } from "@/data/types";
 import { education, experience } from "@/data/experience";
 import { skillGroups } from "@/data/skills";
@@ -56,7 +57,7 @@ export function Journey() {
   return (
     <section id="experience" aria-labelledby="experience-title" className="container-x py-24 md:py-36">
       <SectionHeading
-        index="05"
+        index={sectionIndex("experience")}
         label="Experience & education"
         id="experience-title"
         title={

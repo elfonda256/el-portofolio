@@ -1,6 +1,6 @@
-import { contact, profile, socials, whatsappHref } from "@/data/site";
+import { contact, cv, profile, socials, whatsappHref, sectionIndex } from "@/data/site";
 import { Reveal } from "@/components/ui/Reveal";
-import { ArrowUpRight, Mail, WhatsApp, socialIcons } from "@/components/ui/Icons";
+import { ArrowUpRight, Download, Mail, WhatsApp, socialIcons } from "@/components/ui/Icons";
 
 export function Contact() {
   const wa = whatsappHref();
@@ -16,7 +16,7 @@ export function Contact() {
         <div className="relative">
           <Reveal>
             <p className="eyebrow flex items-center gap-3 !text-white/50">
-              <span>(07)</span>
+              <span>({sectionIndex("contact")})</span>
               <span className="h-px w-8 bg-white/20" />
               <span>Contact</span>
             </p>
@@ -42,6 +42,11 @@ export function Contact() {
                 {wa && (
                   <a href={wa} target="_blank" rel="noopener noreferrer" className="btn border border-white/20 text-canvas hover:border-white/60">
                     <WhatsApp size={17} /> WhatsApp
+                  </a>
+                )}
+                {cv.href && (
+                  <a href={cv.href} download className="btn border border-white/20 text-canvas hover:border-white/60">
+                    <Download size={17} /> {cv.label}
                   </a>
                 )}
               </div>

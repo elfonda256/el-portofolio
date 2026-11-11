@@ -1,3 +1,4 @@
+import { sectionIndex } from "@/data/site";
 import Link from "next/link";
 import { featuredProjects, projects } from "@/data/projects";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -10,7 +11,7 @@ export function Portfolio() {
   return (
     <section id="portfolio" aria-labelledby="portfolio-title" className="container-x py-20 md:py-28">
       <SectionHeading
-        index="03"
+        index={sectionIndex("portfolio")}
         label="Recent work"
         id="portfolio-title"
         title="My Portfolio"

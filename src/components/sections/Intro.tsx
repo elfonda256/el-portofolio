@@ -1,7 +1,7 @@
-import { contact, profile, whatsappHref } from "@/data/site";
+import { contact, cv, profile, whatsappHref, sectionIndex } from "@/data/site";
 import { Reveal } from "@/components/ui/Reveal";
 import { SocialLinks } from "@/components/ui/SocialLinks";
-import { ArrowUpRight, Mail, WhatsApp } from "@/components/ui/Icons";
+import { ArrowUpRight, Download, Mail, WhatsApp } from "@/components/ui/Icons";
 import { Availability } from "./Hero";
 
 export function Intro() {
@@ -16,7 +16,7 @@ export function Intro() {
         <div className="flex flex-col gap-8 lg:pt-3">
           <Reveal>
             <p className="eyebrow flex items-center gap-3">
-              <span>(01)</span>
+              <span>({sectionIndex("intro")})</span>
               <span className="h-px w-8 bg-line" />
               <span>Introduction</span>
             </p>
@@ -64,6 +64,11 @@ export function Intro() {
             {wa && (
               <a href={wa} target="_blank" rel="noopener noreferrer" className="btn btn-light">
                 <WhatsApp size={17} /> WhatsApp
+              </a>
+            )}
+            {cv.href && (
+              <a href={cv.href} download className="btn btn-light">
+                <Download size={17} /> {cv.label}
               </a>
             )}
             <a href="#contact" className="btn btn-light">

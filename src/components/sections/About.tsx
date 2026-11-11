@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { photos, profile } from "@/data/site";
+import { photos, profile, sectionIndex } from "@/data/site";
 import { coreSkills } from "@/data/skills";
 import { Reveal } from "@/components/ui/Reveal";
 
@@ -29,7 +29,7 @@ export function About() {
         <div>
           <Reveal>
             <p className="eyebrow mb-5 flex items-center gap-3">
-              <span>(04)</span>
+              <span>({sectionIndex("about")})</span>
               <span className="h-px w-8 bg-line" />
               <span>About me</span>
             </p>

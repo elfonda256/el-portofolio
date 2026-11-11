@@ -37,7 +37,7 @@ export const projects: Project[] = [
     imageAlt: ph.weatherSensor.alt,
     imagePosition: ph.weatherSensor.position,
     hero: ph.rimpPresentation,
-    gallery: [ph.telemetryWmsDashboard, ph.weatherSensor, ph.jointInspection, ph.rimpPresentation, ph.fieldStation],
+    gallery: [ph.wmsStations, ph.wmsTelecontrol, ph.wmsMap, ph.wmsStationDetail, ph.telemetryWmsDashboard, ph.weatherSensor, ph.jointInspection, ph.rimpPresentation, ph.fieldStation],
     cover: "telemetry",
     featured: true,
   },

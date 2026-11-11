@@ -1,3 +1,4 @@
+import { sectionIndex } from "@/data/site";
 import Image from "next/image";
 import { featuredVideo, youtubeChannel } from "@/data/content";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -11,7 +12,7 @@ export function LatestContent() {
 
   return (
     <section id="content" aria-labelledby="content-title" className="container-x py-20 md:py-28">
-      <SectionHeading index="02" label="Blog & video" id="content-title" title="Latest Content" />
+      <SectionHeading index={sectionIndex("content")} label="Blog & video" id="content-title" title="Latest Content" />
 
       <div className="grid items-end gap-8 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
         <Reveal>

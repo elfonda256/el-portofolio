@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Analytics } from "@vercel/analytics/next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { profile, site, socials, contact } from "@/data/site";
@@ -30,12 +31,13 @@ export const metadata: Metadata = {
     title: `${profile.name} — ${profile.title}`,
     description: site.description,
     siteName: profile.name,
-    images: [{ url: profile.portrait.photo, width: 548, height: 718, alt: profile.portrait.alt }],
+    images: [{ url: site.ogImage, width: 1200, height: 630, alt: `${profile.name} — ${profile.title}` }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: `${profile.name} — ${profile.title}`,
     description: site.description,
+    images: [site.ogImage],
   },
 };
 
@@ -82,6 +84,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <main id="main">{children}</main>
         <Footer />
+        {/* Visitor stats — turn on "Web Analytics" in the Vercel project to see them. */}
+        <Analytics />
       </body>
     </html>
   );

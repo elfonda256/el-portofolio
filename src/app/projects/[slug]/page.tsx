@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/data/projects";
+import { site } from "@/data/site";
 import { ProjectMedia } from "@/components/ui/ProjectCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { Gallery } from "@/components/ui/Gallery";
@@ -26,7 +27,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
     title: project.title,
     description: project.summary,
     alternates: { canonical: `/projects/${project.slug}` },
-    openGraph: { title: project.title, description: project.summary },
+    openGraph: {
+      title: project.title,
+      description: project.summary,
+      images: [project.gallery?.[0]?.src ?? project.image ?? site.ogImage],
+    },
+    twitter: { card: "summary_large_image", title: project.title, description: project.summary },
   };
 }
 

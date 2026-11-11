@@ -30,6 +30,9 @@ export const ArrowUpRight = (p: IconProps) => (
 export const ArrowUp = (p: IconProps) => (
   <svg {...base(p)}><path d="M12 19V5M6 11l6-6 6 6" /></svg>
 );
+export const Download = (p: IconProps) => (
+  <svg {...base(p)}><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
+);
 export const Play = (p: IconProps) => (
   <svg {...base(p)} fill="currentColor" stroke="none"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5Z" /></svg>
 );

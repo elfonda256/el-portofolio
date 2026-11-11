@@ -96,6 +96,34 @@ export const contact = {
   },
 } as const;
 
+/**
+ * Downloadable CV. Replace the file in public/cv/ to update it (keep the same
+ * name), or set `href: ""` to hide the buttons.
+ * This public copy has the phone number removed on purpose.
+ */
+export const cv = {
+  href: "/cv/Elfano_Sultan_Syahbana_CV.pdf",
+  label: "Download CV",
+} as const;
+
+/**
+ * Home page sections. Set `showLatestContent: true` once the first video or
+ * write-up is ready — the Blog section, its nav link and the section numbers
+ * all follow this switch.
+ */
+export const features = {
+  showLatestContent: false,
+} as const;
+
+const homeSectionOrder = ["intro", "content", "portfolio", "about", "experience", "products", "contact"] as const;
+type HomeSection = (typeof homeSectionOrder)[number];
+
+/** "(02)"-style number for a home section, skipping hidden sections. */
+export function sectionIndex(id: HomeSection): string {
+  const visible = homeSectionOrder.filter((s) => s !== "content" || features.showLatestContent);
+  return String(visible.indexOf(id as never) + 1).padStart(2, "0");
+}
+
 export const socials: SocialLink[] = [
   {
     key: "linkedin",
@@ -126,7 +154,7 @@ export const navigation = [
   { label: "Portfolio", href: "/#portfolio" },
   { label: "About", href: "/#about" },
   { label: "Products", href: "/#products" },
-] as const;
+].filter((item) => item.href !== "/#content" || features.showLatestContent);
 
 export const site = {
   /**
@@ -139,6 +167,8 @@ export const site = {
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : "https://el-portofolio-five.vercel.app"),
+  /** Link-preview image (1200×630) for LinkedIn, WhatsApp, X, etc. */
+  ogImage: "/og.jpg",
   description:
     "Portfolio of Elfano Sultan Syahbana — Automation & Software Engineer working across Industrial IoT, robotics, applied AI and enterprise software. Based in Karawang, Indonesia.",
   keywords: [

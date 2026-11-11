@@ -7,6 +7,7 @@ import { About } from "@/components/sections/About";
 import { Journey } from "@/components/sections/Journey";
 import { Services } from "@/components/sections/Services";
 import { Contact } from "@/components/sections/Contact";
+import { features } from "@/data/site";
 
 export default function HomePage() {
   return (
@@ -14,7 +15,7 @@ export default function HomePage() {
       <Hero />
       <Intro />
       <FieldBand />
-      <LatestContent />
+      {features.showLatestContent && <LatestContent />}
       <Portfolio />
       <About />
       <Journey />

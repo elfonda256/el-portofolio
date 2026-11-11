@@ -1,3 +1,4 @@
+import { sectionIndex } from "@/data/site";
 import { services } from "@/data/services";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/ui/Reveal";
@@ -9,7 +10,7 @@ export function Services() {
     <section id="products" aria-labelledby="products-title" className="bg-surface py-24 md:py-36">
       <div className="container-x">
         <SectionHeading
-          index="06"
+          index={sectionIndex("products")}
           label="Products & services"
           id="products-title"
           title={

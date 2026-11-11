@@ -33,6 +33,8 @@ export const skillGroups: SkillGroup[] = [
     name: "Industrial IoT",
     items: ["Telemetry", "Telecontrol", "Modbus", "MQTT", "GSM", "Remote Monitoring", "Sensor Integration", "Data Loggers", "Communication Gateways", "Data Acquisition"],
   },
+  /** Stated by Elfano (not on the CV PDF yet). */
+  { name: "English", items: ["TOEIC 750 (2024)", "TOEFL 501 (2021)"] },
   {
     name: "Engineering",
     items: ["Business Process Analysis", "Requirements Gathering", "System Architecture", "Database Design", "UI/UX Design", "AI-Assisted Development"],
