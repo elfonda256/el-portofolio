@@ -23,7 +23,7 @@ export default function ProjectsPage() {
         </p>
       </Reveal>
       <Reveal delay={80}>
-        <h1 className="display mt-6 text-[clamp(3rem,9vw,7.5rem)]">
+        <h1 className="title-xl mt-6 text-[clamp(4rem,12vw,10rem)]">
           All projects<span className="text-muted">.</span>
         </h1>
       </Reveal>

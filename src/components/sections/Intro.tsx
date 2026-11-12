@@ -10,13 +10,13 @@ export function Intro() {
   const [lead, ...rest] = profile.headline.split(" and ");
 
   return (
-    <section id="intro" aria-labelledby="intro-title" className="container-x pb-16 pt-24 md:pb-24 md:pt-36">
+    <section id="intro" data-scene="1" aria-labelledby="intro-title" className="container-x pb-16 pt-28 md:pb-24 md:pt-44">
       <div className="grid gap-14 lg:grid-cols-[18rem_1fr] lg:gap-20">
         {/* Left rail */}
         <div className="flex flex-col gap-8 lg:pt-3">
           <Reveal>
             <p className="eyebrow flex items-center gap-3">
-              <span>({sectionIndex("intro")})</span>
+              <span className="signal-text">({sectionIndex("intro")})</span>
               <span className="h-px w-8 bg-line" />
               <span>Introduction</span>
             </p>
@@ -25,7 +25,7 @@ export function Intro() {
             <SocialLinks />
           </Reveal>
           <Reveal delay={140}>
-            <div className="rounded-2xl border border-line bg-surface p-5 text-sm">
+            <div className="glass rounded-2xl p-5 text-sm">
               <Availability className="font-medium text-ink" />
               <p className="mt-3 leading-relaxed text-muted">Based in {profile.location}.</p>
             </div>
@@ -35,7 +35,7 @@ export function Intro() {
         {/* Main */}
         <div>
           <Reveal>
-            <h2 id="intro-title" className="display text-[clamp(2.4rem,5.6vw,5rem)] leading-[1.0]">
+            <h2 id="intro-title" className="title-xl text-[clamp(3rem,7.4vw,7rem)]">
               {lead}
               {rest.length > 0 && (
                 <>
@@ -77,12 +77,12 @@ export function Intro() {
           </Reveal>
 
           {/* Key numbers */}
-          <dl className="mt-20 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line sm:grid-cols-3">
+          <dl className="mt-20 grid gap-px overflow-hidden rounded-[var(--radius-card)] border border-line bg-line/60 backdrop-blur-md sm:grid-cols-3">
             {profile.stats.map((s, i) => (
-              <Reveal key={s.label} delay={i * 90} className="bg-surface p-6 md:p-8">
+              <Reveal key={s.label} delay={i * 90} className="bg-canvas/75 p-6 md:p-8">
                 <dt className="sr-only">{s.label}</dt>
                 <dd>
-                  <p className="text-[clamp(2.25rem,4vw,3.25rem)] font-semibold leading-none tracking-[-0.05em]">
+                  <p className="title-xl text-[clamp(3rem,5.5vw,4.5rem)] !leading-none">
                     {s.value}
                     {"unit" in s && <span className="ml-1.5 text-base font-medium tracking-normal text-muted">{s.unit}</span>}
                   </p>

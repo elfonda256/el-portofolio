@@ -158,15 +158,10 @@ export const navigation = [
 
 export const site = {
   /**
-   * Canonical/OG base URL. Order: NEXT_PUBLIC_SITE_URL (set this when a custom
-   * domain is added) → Vercel's production domain (provided automatically at
-   * build time) → the current live URL.
+   * Canonical/OG base URL. Set NEXT_PUBLIC_SITE_URL in Vercel when a custom
+   * domain is added; otherwise the primary vercel.app domain is used.
    */
-  url:
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
-      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : "https://el-portofolio-five.vercel.app"),
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://elfano-sultan-syahbana.vercel.app",
   /** Link-preview image (1200×630) for LinkedIn, WhatsApp, X, etc. */
   ogImage: "/og.jpg",
   description:

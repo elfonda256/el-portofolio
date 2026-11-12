@@ -8,6 +8,13 @@ import { Footer } from "@/components/layout/Footer";
 import { profile, site, socials, contact } from "@/data/site";
 import "./globals.css";
 
+const bigShoulders = localFont({
+  src: "./fonts/BigShoulders-Variable.woff2",
+  weight: "100 900",
+  variable: "--font-big-shoulders",
+  display: "swap",
+});
+
 const caveat = localFont({
   src: "./fonts/Caveat-Medium.woff2",
   weight: "500",
@@ -42,7 +49,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fafaf9",
+  themeColor: "#04060a",
   width: "device-width",
   initialScale: 1,
 };
@@ -63,12 +70,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${caveat.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${caveat.variable} ${bigShoulders.variable}`}
       suppressHydrationWarning
     >
       <head>
         {/* Marks JS as available so reveal animations can start hidden. */}
-        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <script dangerouslySetInnerHTML={{
+            __html:
+              "document.documentElement.classList.add('js');try{if(sessionStorage.getItem('intro-seen'))document.documentElement.classList.add('intro-seen')}catch(e){}",
+          }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}

@@ -5,25 +5,20 @@ import { ArrowUpRight, Download, Mail, WhatsApp, socialIcons } from "@/component
 export function Contact() {
   const wa = whatsappHref();
   return (
-    <section id="contact" aria-labelledby="contact-title" className="container-x py-24 md:py-32">
-      <div className="relative overflow-hidden rounded-[2rem] bg-ink px-6 py-16 text-canvas sm:px-10 md:rounded-[2.5rem] md:px-16 md:py-24">
-        {/* faint grid texture */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:56px_56px] [mask-image:radial-gradient(80%_80%_at_80%_20%,black,transparent)]"
-        />
+    <section id="contact" data-scene="4" aria-labelledby="contact-title" className="container-x flex min-h-[100svh] flex-col justify-center py-24 md:py-32">
+      <div className="relative">
 
         <div className="relative">
           <Reveal>
             <p className="eyebrow flex items-center gap-3 !text-white/50">
-              <span>({sectionIndex("contact")})</span>
+              <span className="signal-text">({sectionIndex("contact")})</span>
               <span className="h-px w-8 bg-white/20" />
               <span>Contact</span>
             </p>
           </Reveal>
 
           <Reveal delay={80}>
-            <h2 id="contact-title" className="display mt-8 max-w-5xl text-[clamp(2.75rem,8vw,7.5rem)] leading-[0.92]">
+            <h2 id="contact-title" className="title-xl mt-8 max-w-6xl text-[clamp(4rem,13vw,12rem)] [text-shadow:0_0_80px_rgb(127_227_255/0.2)]">
               Let&apos;s build something <span className="text-white/45">that works.</span>
             </h2>
           </Reveal>
@@ -35,17 +30,17 @@ export function Contact() {
                 and software engineering meet? I&apos;d like to hear about it.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href={`mailto:${contact.email}`} className="btn bg-canvas text-ink hover:bg-white hover:shadow-[0_20px_40px_-20px_rgba(255,255,255,0.4)]">
+                <a href={`mailto:${contact.email}`} className="btn btn-dark">
                   <Mail size={17} /> Email me
                   <ArrowUpRight size={15} className="btn-icon" />
                 </a>
                 {wa && (
-                  <a href={wa} target="_blank" rel="noopener noreferrer" className="btn border border-white/20 text-canvas hover:border-white/60">
+                  <a href={wa} target="_blank" rel="noopener noreferrer" className="btn border border-white/20 text-ink hover:border-white/60">
                     <WhatsApp size={17} /> WhatsApp
                   </a>
                 )}
                 {cv.href && (
-                  <a href={cv.href} download className="btn border border-white/20 text-canvas hover:border-white/60">
+                  <a href={cv.href} download className="btn border border-white/20 text-ink hover:border-white/60">
                     <Download size={17} /> {cv.label}
                   </a>
                 )}

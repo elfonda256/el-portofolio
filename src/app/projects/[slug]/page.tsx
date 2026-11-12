@@ -69,7 +69,7 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
               </p>
             </Reveal>
             <Reveal delay={80}>
-              <h1 className="display mt-5 text-[clamp(2.75rem,7vw,6rem)]">{project.title}</h1>
+              <h1 className="title-xl mt-5 text-[clamp(3.5rem,9vw,8rem)]">{project.title}</h1>
             </Reveal>
           </div>
           <Reveal delay={140}>

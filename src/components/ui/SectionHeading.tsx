@@ -8,25 +8,25 @@ interface SectionHeadingProps {
   id?: string;
 }
 
-/** Editorial section header: "(03) — Portfolio" over a large title. */
+/** Chapter header: "(03) — Recent work" over an oversized condensed title. */
 export function SectionHeading({ index, label, title, aside, id }: SectionHeadingProps) {
   return (
-    <div className="mb-12 flex flex-col gap-6 md:mb-16 md:flex-row md:items-end md:justify-between">
+    <div className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between">
       <div>
         <Reveal>
-          <p className="eyebrow mb-5 flex items-center gap-3">
-            <span>({index})</span>
+          <p className="eyebrow mb-6 flex items-center gap-3">
+            <span className="signal-text">({index})</span>
             <span className="h-px w-8 bg-line" />
             <span>{label}</span>
           </p>
         </Reveal>
         <Reveal delay={80}>
-          <h2 id={id} className="display text-[clamp(2.5rem,6vw,4.75rem)]">
+          <h2 id={id} className="title-xl text-[clamp(3.25rem,9vw,8.5rem)]">
             {title}
           </h2>
         </Reveal>
       </div>
-      {aside && <Reveal delay={160} className="md:max-w-sm md:pb-2">{aside}</Reveal>}
+      {aside && <Reveal delay={160} className="md:max-w-sm md:pb-3">{aside}</Reveal>}
     </div>
   );
 }

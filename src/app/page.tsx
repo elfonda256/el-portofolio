@@ -8,10 +8,14 @@ import { Journey } from "@/components/sections/Journey";
 import { Services } from "@/components/sections/Services";
 import { Contact } from "@/components/sections/Contact";
 import { features } from "@/data/site";
+import { FieldScene } from "@/components/scene/FieldScene";
+import { IntroLoader } from "@/components/scene/IntroLoader";
 
 export default function HomePage() {
   return (
     <>
+      <IntroLoader />
+      <FieldScene />
       <Hero />
       <Intro />
       <FieldBand />

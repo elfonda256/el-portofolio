@@ -6,7 +6,7 @@ import { Reveal } from "@/components/ui/Reveal";
 export function FieldBand() {
   const [main, side] = photos.band;
   return (
-    <section aria-label="Photos from the field" className="container-x pb-8 md:pb-12">
+    <section data-scene="1" aria-label="Photos from the field" className="container-x pb-8 md:pb-12">
       <div className="grid gap-5 lg:grid-cols-[1.55fr_1fr]">
         <Reveal>
           <figure>

@@ -377,7 +377,7 @@ export function ProjectCover({
       preserveAspectRatio="xMidYMid slice"
       role="img"
       aria-label={label}
-      className={`block h-full w-full bg-stone ${className}`}
+      className={`block h-full w-full bg-[#efeeec] [filter:invert(0.94)_hue-rotate(180deg)_saturate(1.4)] ${className}`}
     >
       <Art uid={uid} />
     </svg>

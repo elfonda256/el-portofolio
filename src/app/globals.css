@@ -4,22 +4,26 @@
    Design system
    ───────────────────────────────────────────── */
 @theme {
-  --color-canvas: #fafaf9;      /* primary background */
-  --color-surface: #ffffff;     /* secondary background */
-  --color-ink: #171717;         /* primary text */
-  --color-muted: #737373;       /* secondary text */
-  --color-line: #e5e5e5;        /* borders */
-  --color-stone: #efeeec;       /* image wells */
-  --color-stone-2: #e7e5e2;
-  --color-live: #22a05a;        /* availability dot only */
+  /* "Field to Cloud" — a night-time survey palette */
+  --color-canvas: #04060a;      /* primary background */
+  --color-surface: #0a0e14;     /* secondary background */
+  --color-ink: #e9eef3;         /* primary text */
+  --color-muted: #8793a1;       /* secondary text */
+  --color-line: #1b232d;        /* borders */
+  --color-stone: #0e141b;       /* image wells */
+  --color-stone-2: #131a23;
+  --color-live: #3ddc8a;        /* availability dot only */
+  --color-signal: #7fe3ff;      /* scan / data accent */
+  --color-amber: #ffb454;       /* station / node accent */
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-hand: var(--font-caveat), "Segoe Script", cursive;
+  --font-display: var(--font-big-shoulders), var(--font-geist-sans), ui-sans-serif, sans-serif;
 
   --radius-card: 1.75rem;
-  --shadow-soft: 0 1px 2px rgb(23 23 23 / 0.04), 0 8px 24px -12px rgb(23 23 23 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(23 23 23 / 0.04), 0 24px 48px -20px rgb(23 23 23 / 0.22);
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 24px 48px -20px rgb(0 0 0 / 0.8);
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   --animate-rise: rise 1s var(--ease-out-expo) both;
@@ -105,9 +109,10 @@
   }
   .btn:active { transform: scale(0.97); }
   .btn-dark { background: var(--color-ink); color: var(--color-canvas); }
-  .btn-dark:hover { background: #2c2c2c; box-shadow: var(--shadow-lift); }
+  .btn-dark:hover { background: #ffffff; box-shadow: 0 0 0 4px rgb(127 227 255 / 0.12), 0 18px 40px -18px rgb(127 227 255 / 0.55); }
   .btn-light {
-    background: var(--color-surface);
+    background: rgb(10 14 20 / 0.6);
+    backdrop-filter: blur(10px);
     color: var(--color-ink);
     border: 1px solid var(--color-line);
   }
@@ -117,15 +122,16 @@
   .btn:hover .btn-icon-plain { transform: translateX(3px); }
 
   .chip {
+    backdrop-filter: blur(6px);
     display: inline-flex;
     align-items: center;
     height: 1.75rem;
     padding-inline: 0.7rem;
     border-radius: 999px;
     border: 1px solid var(--color-line);
-    background: var(--color-surface);
+    background: rgb(10 14 20 / 0.55);
     font-size: 0.8125rem;
-    color: #404040;
+    color: #b8c2cd;
     white-space: nowrap;
   }
 
@@ -163,4 +169,89 @@ html:not(.js) .reveal { opacity: 1; transform: none; }
 @keyframes scrollcue {
   0% { transform: translateY(-100%); }
   100% { transform: translateY(200%); }
+}
+
+/* ─────────────────────────────────────────────
+   Field to Cloud — cinematic layer
+   ───────────────────────────────────────────── */
+@layer components {
+  /* Condensed industrial display type */
+  .title-xl {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.005em;
+    line-height: 0.84;
+  }
+  .title-thin { font-weight: 300; }
+
+  /* Glass panel for dense text over the point cloud */
+  .glass {
+    background: linear-gradient(180deg, rgb(10 14 20 / 0.72), rgb(6 9 13 / 0.62));
+    border: 1px solid var(--color-line);
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  }
+
+  /* HUD corner brackets */
+  .hud-frame { position: relative; }
+  .hud-frame::before,
+  .hud-frame::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-color: var(--color-signal);
+    opacity: 0.75;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hud-frame::before { left: -7px; top: -7px; border-left: 1px solid; border-top: 1px solid; }
+  .hud-frame::after { right: -7px; bottom: -7px; border-right: 1px solid; border-bottom: 1px solid; }
+
+  .hud-label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .signal-text { color: var(--color-signal); }
+}
+
+/* Project frames swing into place as they scroll in (browsers with scroll-driven animations). */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .frame-3d {
+      animation: frame-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 42%;
+      transform-origin: 50% 50%;
+    }
+    .frame-3d-rev { --frame-ry: 18deg; }
+  }
+}
+@keyframes frame-in {
+  from {
+    transform: perspective(1600px) rotateY(var(--frame-ry, -18deg)) rotateX(10deg) translateZ(-160px) scale(0.9);
+    opacity: 0.2;
+    filter: brightness(0.5) saturate(0.6);
+  }
+  to {
+    transform: perspective(1600px) rotateY(0deg) rotateX(0deg) translateZ(0) scale(1);
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* Intro loader (shown once per session, only when JS runs) */
+.intro-loader { display: none; }
+html.js:not(.intro-seen) .intro-loader { display: flex; }
+@media (prefers-reduced-motion: reduce) {
+  html.js .intro-loader { display: none; }
+}
+.intro-loader.is-done {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s var(--ease-out-expo), visibility 0s linear 0.8s;
 }
