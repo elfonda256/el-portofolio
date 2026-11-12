@@ -10,8 +10,15 @@ import { buildCurve, buildLights, buildTrackGeometry, mulberry32 } from "./track
  */
 
 const SECTORS = ["Grid", "Sector 1", "Sector 2", "Sector 3", "Finish"] as const;
-const START_U = 0.012; // camera on the grid, just behind the start gantry
 const GANTRY_U = 0.03;
+/**
+ * Each home-page chapter is its own place on the circuit. Crossing into the
+ * next chapter plays a "jump": the camera lunges forward, the view stretches,
+ * speed lines flash — and it lands at the next location.
+ */
+const SCENE_U = [0.012, 0.1, 0.33, 0.62, 0.93]; // grid, straight, hairpin, esses, final corner
+const SCENE_SPAN = 0.03; // how far the camera creeps while reading one chapter
+const JUMP_TIME = 1.05; // seconds
 
 // Survives client-side navigation, so the next page continues the same lap.
 let lastU: number | null = null;
@@ -235,11 +242,17 @@ const poolFrag = /* glsl */ `
 `;
 
 /* ── component ───────────────────────────────── */
+/** Current chapter (by the viewport centre) and how far through it the reader is (0..1). */
 function readSector(sections: { el: HTMLElement; scene: number }[]) {
   const c = window.scrollY + window.innerHeight * 0.5;
   let s = sections[0]?.scene ?? 0;
   for (const it of sections) if (it.el.offsetTop <= c) s = it.scene;
-  return s;
+  const group = sections.filter((it) => it.scene === s);
+  if (!group.length) return { scene: s, t: 0 };
+  const top = group[0].el.offsetTop;
+  const last = group[group.length - 1].el;
+  const bottom = last.offsetTop + last.offsetHeight;
+  return { scene: s, t: Math.min(1, Math.max(0, (c - top) / Math.max(1, bottom - top))) };
 }
 
 export function TrackScene({ dim = false }: { dim?: boolean }) {
@@ -249,6 +262,8 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
   const lapRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<SVGCircleElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
+  const veilFrontRef = useRef<HTMLDivElement>(null);
   const [sector, setSector] = useState(0);
   const [failed, setFailed] = useState(false);
 
@@ -488,11 +503,13 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         return max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
       };
 
+      let baseFov = 52;
       const resize = () => {
         const w = window.innerWidth, h = window.innerHeight;
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
-        camera.fov = w / h < 0.8 ? 66 : 52;
+        baseFov = w / h < 0.8 ? 66 : 52;
+        camera.fov = baseFov;
         camera.updateProjectionMatrix();
         scaleU.value = (h * dpr) / (2 * Math.tan((camera.fov * Math.PI) / 360));
         collect();
@@ -505,7 +522,14 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       const arriving = lastU !== null;
       // project pages cruise on from wherever the visitor was on the lap
       const baseDim = lastU ?? 0.35;
-      let u = arriving ? (lastU as number) : START_U + pageProgress() * 0.96;
+      const first = sections.length ? readSector(sections) : { scene: 0, t: 0 };
+      let shownScene = first.scene; // the chapter the camera is currently at
+      let jump = -1; // 0..1 while jumping between chapters, -1 when idle
+      let jumpStart = 0;
+      let jumpTo = shownScene;
+      let swapped = false;
+      const anchor = (sc: number, t: number) => SCENE_U[sc] + t * SCENE_SPAN;
+      let u = arriving ? (lastU as number) : dim ? baseDim : anchor(first.scene, first.t);
       let cruise = 0;
       let speed = 0; // m/s
       let boost = arriving && !reduce ? 1 : 0;
@@ -528,17 +552,59 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         last = now;
         if (!reduce) time += dt;
 
-        // target position on the lap
-        const sec = sections.length ? readSector(sections) : 0;
-        if (!dim && sec > 0 && !reduce) cruise += dt * 0.0012;
+        // which chapter, and whether to jump to a new one
+        const read = sections.length ? readSector(sections) : { scene: 0, t: 0 };
+        const sec = read.scene;
+        if (!dim && sec !== jumpTo) {
+          jumpTo = sec;
+          if (reduce) shownScene = sec;
+          else if (jump < 0 || swapped) {
+            jump = 0;
+            jumpStart = now;
+            swapped = false;
+          }
+        }
+        let kick = 0;
+        if (jump >= 0) {
+          // wall-clock timing, so the jump lasts the same on slow devices
+          jump = (now - jumpStart) / 1000 / JUMP_TIME;
+          // lunge out, cut to the new place at the peak, settle in
+          if (!swapped && jump >= 0.42) {
+            swapped = true;
+            shownScene = jumpTo;
+            u = anchor(shownScene, read.t);
+          }
+          kick = Math.sin(Math.min(1, jump) * Math.PI);
+          if (jump >= 1) jump = -1;
+        }
         if (dim && !reduce) cruise += dt * 0.004;
-        const target = dim ? baseDim + cruise : START_U + pageProgress() * 0.96 + cruise;
+        else if (!reduce && shownScene > 0) cruise = Math.min(cruise + dt * 0.0004, SCENE_SPAN * 0.6);
+        const target = dim ? baseDim + cruise : anchor(shownScene, read.t) + (shownScene > 0 ? cruise : 0);
         const prev = u;
-        u = reduce ? target : u + (target - u) * Math.min(1, dt * 2.2);
+        // during the lunge the camera surges forward on its own
+        if (jump >= 0 && !swapped) u += dt * 0.02 * kick;
+        else u = reduce ? target : u + (target - u) * Math.min(1, dt * 2.4);
         lastU = u;
-        const inst = Math.abs(u - prev) * L / Math.max(dt, 1e-3);
+        const inst = swapped && jump >= 0 && jump < 0.5 ? 0 : (Math.abs(u - prev) * L) / Math.max(dt, 1e-3);
         boost = Math.max(0, boost - dt * 0.8);
-        speed += (inst + boost * 70 - speed) * Math.min(1, dt * 4);
+        speed += (Math.min(inst, 120) + boost * 70 + kick * 95 - speed) * Math.min(1, dt * 4);
+
+        // stretch the view and flash the veil during a jump
+        const fov = baseFov + kick * 34;
+        if (Math.abs(camera.fov - fov) > 0.01) {
+          camera.fov = fov;
+          camera.updateProjectionMatrix();
+        }
+        if (veilRef.current) {
+          const v = jump >= 0 ? Math.pow(kick, 2.2) : 0;
+          veilRef.current.style.opacity = v.toFixed(3);
+          veilRef.current.style.transform = `scale(${(1 + kick * 0.25).toFixed(3)})`;
+        }
+        if (veilFrontRef.current) {
+          const v = jump >= 0 ? Math.pow(kick, 3) * 0.32 : 0;
+          veilFrontRef.current.style.opacity = v.toFixed(3);
+          veilFrontRef.current.style.transform = `scale(${(1.1 + kick * 0.35).toFixed(3)})`;
+        }
 
         const uu = ((u % 1) + 1) % 1;
         curve.getPointAt(uu, p0);
@@ -559,7 +625,7 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         camera.lookAt(look);
 
         // gantry: five reds on the grid, lights out once the lap starts
-        const lightsOn = sec === 0 && !dim ? 1 : 0;
+        const lightsOn = shownScene === 0 && !dim ? 1 : 0;
         for (let i = 0; i < 5; i++) dynCol.set([red.r * lightsOn, red.g * lightsOn, red.b * lightsOn], i * 3);
         // rain light: steady glow with the rain-light flash
         const flash = reduce ? 1 : 0.7 + 0.3 * (Math.sin(time * 26) > 0 ? 1 : 0.35);
@@ -595,9 +661,9 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
             dotRef.current.setAttribute("cy", my.toFixed(1));
           }
         }
-        if (sec !== shownSector) {
-          shownSector = sec;
-          setSector(sec);
+        if (shownScene !== shownSector) {
+          shownSector = shownScene;
+          setSector(shownScene);
         }
         if (!ready) {
           ready = true;
@@ -642,6 +708,9 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         aria-hidden="true"
         className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(130%_90%_at_50%_40%,transparent_45%,rgb(6_7_8/0.8)_100%)]"
       />
+      {/* chapter jump: speed lines + red flash behind the content */}
+      <div ref={veilRef} aria-hidden="true" className="jump-veil pointer-events-none fixed inset-0 -z-[9] opacity-0" />
+      <div ref={veilFrontRef} aria-hidden="true" className="jump-veil pointer-events-none fixed inset-0 z-30 opacity-0" />
       {!failed && !dim && (
         <div aria-hidden="true" className="pointer-events-none fixed bottom-4 left-4 z-40 hidden origin-bottom-left scale-[0.82] items-end gap-4 opacity-90 md:flex">
           <div className="glass flex items-end gap-4 rounded-2xl px-4 py-3">

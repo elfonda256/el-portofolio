@@ -369,3 +369,20 @@ html:active-view-transition-type(enter-project, leave-project)::view-transition 
     animation-delay: 0s !important;
   }
 }
+
+/* Chapter jump veil (driven from TrackScene): speed lines converging on the centre */
+.jump-veil {
+  background:
+    radial-gradient(circle at 50% 52%, rgb(255 255 255 / 0.55), rgb(255 70 50 / 0.35) 6rem, transparent 26rem),
+    repeating-conic-gradient(
+      from 0deg at 50% 52%,
+      transparent 0deg 1.4deg,
+      rgb(255 255 255 / 0.22) 1.5deg 1.62deg,
+      transparent 1.7deg 2.9deg,
+      rgb(255 70 50 / 0.3) 2.95deg 3.05deg,
+      transparent 3.1deg 4.2deg
+    );
+  -webkit-mask-image: radial-gradient(circle at 50% 52%, transparent 0 4rem, black 22rem);
+  mask-image: radial-gradient(circle at 50% 52%, transparent 0 4rem, black 22rem);
+  will-change: opacity, transform;
+}
