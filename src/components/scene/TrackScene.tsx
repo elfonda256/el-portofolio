@@ -2,26 +2,27 @@
 
 import { useEffect, useRef, useState } from "react";
 import { buildCurve, buildLights, buildTrackGeometry, mulberry32 } from "./track";
+import { buildCar, buildFlag, buildGarage, buildNightEnv, buildPitLane, buildPitWall } from "./world";
 
 /**
  * "Night Lap" — a fixed full-screen 3D night circuit behind the page.
- * Scrolling drives the camera around one lap behind a red rain light.
- * Sections mark their sector with `data-scene="0..4"` (grid, S1, S2, S3, finish).
+ * Sections pick their place with `data-scene="0..5"` (see PLACES below).
  */
 
-const SECTORS = ["Grid", "Sector 1", "Sector 2", "Sector 3", "Finish"] as const;
-const GANTRY_U = 0.03;
 /**
- * Each home-page chapter is its own place on the circuit. Crossing into the
- * next chapter plays a "jump": the camera lunges forward, the view stretches,
- * speed lines flash — and it lands at the next location.
+ * Each home-page chapter is its own place in the racing world. Crossing into
+ * the next chapter plays a "jump": the camera lunges forward, the view
+ * stretches, speed lines flash — and it lands in the next place.
+ *   0 Grid · 1 Pit lane · 2 Garage · 3 Pit wall · 4 On track · 5 Finish
  */
-const SCENE_U = [0.012, 0.1, 0.33, 0.62, 0.93]; // grid, straight, hairpin, esses, final corner
-const SCENE_SPAN = 0.03; // how far the camera creeps while reading one chapter
+const PLACES = ["Grid", "Pit lane", "Garage", "Pit wall", "On track", "Finish"] as const;
+const GANTRY_U = 0.03;
 const JUMP_TIME = 1.05; // seconds
+const GARAGE_AT: [number, number, number] = [0, 0, 420]; // built away from the circuit
+const PITWALL_AT: [number, number, number] = [-40, 0, 10.6];
 
-// Survives client-side navigation, so the next page continues the same lap.
-let lastU: number | null = null;
+// Survives client-side navigation, so a project page continues in the same place.
+let lastPlace: number | null = null;
 
 /* ── shaders ─────────────────────────────────── */
 const FOG = /* glsl */ `
@@ -470,7 +471,7 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       const sprayGeo = track(new THREE.BufferGeometry());
       sprayGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(sprayN * 3), 3));
       sprayGeo.setAttribute("aSeed", new THREE.BufferAttribute(spSeed, 3));
-      const leadPos = new THREE.Vector3();
+      const leadPos = new THREE.Vector3(); // rear axle of the car, for the tyre spray
       const sideV = new THREE.Vector3();
       const sprayU = { uTime: { value: 0 }, uLead: { value: leadPos }, uFwd: { value: fwd }, uSide: { value: sideV }, uAmount: { value: 0.3 }, uScale: scaleU };
       const spray = new THREE.Points(
@@ -492,7 +493,39 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         (pathRef.current as unknown as { __map: typeof map }).__map = map;
       }
 
-      // scroll → lap position
+      // ── set pieces ──
+      const env = buildNightEnv(THREE, renderer);
+      track(env);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      const car = buildCar(THREE, env);
+      scene.add(car.group);
+      disposables.push(car);
+      const pitLane = buildPitLane(THREE);
+      scene.add(pitLane.group);
+      disposables.push(pitLane);
+      const garageOrigin = new THREE.Vector3(...GARAGE_AT);
+      const garage = buildGarage(THREE, garageOrigin, lite);
+      scene.add(garage.group);
+      disposables.push(garage);
+      const pitWallAt = new THREE.Vector3(...PITWALL_AT);
+      const pitWall = buildPitWall(THREE, pitWallAt);
+      scene.add(pitWall.group);
+      disposables.push(pitWall);
+      const flag = buildFlag(THREE);
+      flag.group.position.set(gp.x + side.x * 4.5, 8.9, gp.z + side.z * 4.5);
+      flag.group.rotation.y = Math.atan2(gt.x, gt.z) + Math.PI;
+      scene.add(flag.group);
+      disposables.push(flag);
+      // outdoor light for the car: cool floodlight key, faint sky, red rain-light glow
+      const key = new THREE.DirectionalLight("#cfdcff", 1.1);
+      key.position.set(-30, 60, 40);
+      scene.add(key);
+      scene.add(new THREE.HemisphereLight("#3a4252", "#050505", 0.35));
+      const tailGlow = new THREE.PointLight("#ff2a20", 1.2, 5, 1.8);
+      scene.add(tailGlow);
+
+      // ── scroll → place ──
       let sections: { el: HTMLElement; scene: number }[] = [];
       const collect = () => {
         sections = Array.from(document.querySelectorAll<HTMLElement>("[data-scene]")).map((el) => ({ el, scene: Number(el.dataset.scene) || 0 }));
@@ -519,32 +552,104 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       const ro = new ResizeObserver(collect);
       ro.observe(document.body);
 
-      const arriving = lastU !== null;
-      // project pages cruise on from wherever the visitor was on the lap
-      const baseDim = lastU ?? 0.35;
+      const up = new THREE.Vector3(0, 1, 0);
+      const tmp = new THREE.Vector3();
+      const tmpT = new THREE.Vector3();
+      const camTarget = new THREE.Vector3();
+      const lookTarget = new THREE.Vector3();
+      const look = new THREE.Vector3();
+      const carPos = new THREE.Vector3();
+      const carPrev = new THREE.Vector3();
+      const carFwd = new THREE.Vector3(1, 0, 0);
+      const red = new THREE.Color("#ff2a20");
+      const at = (u: number, out: import("three").Vector3) => curve.getPointAt(((u % 1) + 1) % 1, out);
+      const tangentAt = (u: number, out: import("three").Vector3) => curve.getTangentAt(((u % 1) + 1) % 1, out);
+      const placeCarOnTrack = (u: number) => {
+        at(u, carPos);
+        tangentAt(u, carFwd);
+        car.group.position.copy(carPos);
+        car.group.rotation.set(0, Math.atan2(-carFwd.z, carFwd.x), 0);
+      };
+
+      /** Camera position + look target (and car placement) for a place at progress t. */
+      const pose = (place: number, t: number, time: number) => {
+        switch (place) {
+          case 0: {
+            // on the grid behind the car, gantry lights ahead
+            const u = 0.008 + t * 0.006;
+            at(u, camTarget).y = 1.25;
+            placeCarOnTrack(0.008 + 8 / L);
+            at(u + 40 / L, lookTarget).y = 2.2;
+            break;
+          }
+          case 1: {
+            // rolling down the pit lane behind the car, lit garages on the right
+            const x = -78 + t * 34 + time * 0.6;
+            camTarget.set(x, 1.6, 15.4);
+            car.group.position.set(x + 10, 0, 16.6);
+            car.group.rotation.set(0, 0, 0);
+            carFwd.set(1, 0, 0);
+            carPos.copy(car.group.position);
+            lookTarget.set(x + 32, 1.2, 18.5);
+            break;
+          }
+          case 2: {
+            // garage showcase: orbit the parked car
+            const a = 0.75 + t * 1.9 + Math.sin(time * 0.25) * 0.05;
+            camTarget.set(garageOrigin.x + Math.cos(a) * 6.6, 1.55, garageOrigin.z + Math.sin(a) * 6.6);
+            car.group.position.copy(garageOrigin);
+            car.group.rotation.set(0, 0, 0);
+            carFwd.set(1, 0, 0);
+            carPos.copy(garageOrigin);
+            lookTarget.copy(garageOrigin).add(tmp.set(0, 0.45, 0));
+            break;
+          }
+          case 3: {
+            // behind the pit-wall screens, looking across the track; the car keeps lapping past
+            // screens sit on the left, behind the photo, away from the text
+            camTarget.copy(pitWallAt).add(tmp.set(1.7 + t * 0.6, 2.45, 2.7));
+            lookTarget.copy(pitWallAt).add(tmp.set(3.4, 1.4, -18));
+            placeCarOnTrack(0.02 + ((time * 0.016) % 0.13));
+            break;
+          }
+          case 4: {
+            // chase cam: the lap itself — keeps driving even while the reader pauses
+            const u = 0.13 + t * 0.7 + drive;
+            at(u, camTarget).y = 1.2;
+            placeCarOnTrack(u + 9 / L);
+            at(u + 34 / L, lookTarget).y = 0.9;
+            break;
+          }
+          default: {
+            // finish: the chequered flag on the gantry, car crossing the line
+            const u = 0.988 + t * 0.022;
+            at(u, camTarget).y = 1.4;
+            placeCarOnTrack(u + 12 / L + t * 0.008);
+            at(GANTRY_U, lookTarget).y = 5.8;
+          }
+        }
+      };
+
       const first = sections.length ? readSector(sections) : { scene: 0, t: 0 };
-      let shownScene = first.scene; // the chapter the camera is currently at
-      let jump = -1; // 0..1 while jumping between chapters, -1 when idle
-      let jumpStart = 0;
-      let jumpTo = shownScene;
-      let swapped = false;
-      const anchor = (sc: number, t: number) => SCENE_U[sc] + t * SCENE_SPAN;
-      let u = arriving ? (lastU as number) : dim ? baseDim : anchor(first.scene, first.t);
-      let cruise = 0;
-      let speed = 0; // m/s
-      let boost = arriving && !reduce ? 1 : 0;
+      // project pages keep the place the visitor came from
+      let shown = dim ? lastPlace ?? 4 : first.scene;
+      let jump = lastPlace !== null && !reduce ? 0 : -1; // arriving from another page starts with a jump
+      let jumpStart = performance.now();
+      let jumpTo = shown;
+      let swapped = jump < 0;
       let time = 0;
       let last = performance.now();
       let raf = 0;
-      let shownSector = -1;
+      let shownLabel = -1;
       let hudTick = 0;
       let ready = false;
-      const look = new THREE.Vector3();
-      const p0 = new THREE.Vector3();
-      const tan = new THREE.Vector3();
-      const tan2 = new THREE.Vector3();
-      const up = new THREE.Vector3(0, 1, 0);
-      const red = new THREE.Color("#ff2a20");
+      let speed = 0;
+      let dimT = 0;
+      let drive = 0; // extra distance driven while sitting on the track chapter
+      pose(shown, dim ? 0.5 : first.t, 0);
+      camPos.copy(camTarget);
+      look.copy(lookTarget);
+      carPrev.copy(car.group.position);
 
       const frame = (now: number) => {
         raf = requestAnimationFrame(frame);
@@ -552,12 +657,10 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         last = now;
         if (!reduce) time += dt;
 
-        // which chapter, and whether to jump to a new one
-        const read = sections.length ? readSector(sections) : { scene: 0, t: 0 };
-        const sec = read.scene;
-        if (!dim && sec !== jumpTo) {
-          jumpTo = sec;
-          if (reduce) shownScene = sec;
+        const read = dim ? { scene: shown, t: (dimT += dt * 0.01) % 1 } : sections.length ? readSector(sections) : { scene: 0, t: 0 };
+        if (!dim && read.scene !== jumpTo) {
+          jumpTo = read.scene;
+          if (reduce) shown = jumpTo;
           else if (jump < 0 || swapped) {
             jump = 0;
             jumpStart = now;
@@ -566,34 +669,99 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         }
         let kick = 0;
         if (jump >= 0) {
-          // wall-clock timing, so the jump lasts the same on slow devices
           jump = (now - jumpStart) / 1000 / JUMP_TIME;
-          // lunge out, cut to the new place at the peak, settle in
           if (!swapped && jump >= 0.42) {
             swapped = true;
-            shownScene = jumpTo;
-            u = anchor(shownScene, read.t);
+            shown = jumpTo;
+            pose(shown, read.t, time);
+            camPos.copy(camTarget);
+            look.copy(lookTarget);
+            carPrev.copy(car.group.position);
           }
           kick = Math.sin(Math.min(1, jump) * Math.PI);
           if (jump >= 1) jump = -1;
         }
-        if (dim && !reduce) cruise += dt * 0.004;
-        else if (!reduce && shownScene > 0) cruise = Math.min(cruise + dt * 0.0004, SCENE_SPAN * 0.6);
-        const target = dim ? baseDim + cruise : anchor(shownScene, read.t) + (shownScene > 0 ? cruise : 0);
-        const prev = u;
-        // during the lunge the camera surges forward on its own
-        if (jump >= 0 && !swapped) u += dt * 0.02 * kick;
-        else u = reduce ? target : u + (target - u) * Math.min(1, dt * 2.4);
-        lastU = u;
-        const inst = swapped && jump >= 0 && jump < 0.5 ? 0 : (Math.abs(u - prev) * L) / Math.max(dt, 1e-3);
-        boost = Math.max(0, boost - dt * 0.8);
-        speed += (Math.min(inst, 120) + boost * 70 + kick * 95 - speed) * Math.min(1, dt * 4);
+        lastPlace = shown;
+        if (shown === 4 && !reduce) drive = Math.min(drive + dt * 0.0035, 0.06);
 
-        // stretch the view and flash the veil during a jump
+        pose(shown, read.t, time);
+        if (jump >= 0 && !swapped) {
+          // lunge forward along the view direction
+          tmp.subVectors(look, camPos).normalize();
+          camPos.addScaledVector(tmp, dt * 40 * kick);
+          look.addScaledVector(tmp, dt * 40 * kick);
+        } else {
+          const k = reduce ? 1 : Math.min(1, dt * 3);
+          camPos.lerp(camTarget, k);
+          look.lerp(lookTarget, k);
+        }
+        camera.position.copy(camPos);
+        camera.up.set(0, 1, 0);
+        camera.lookAt(look);
         const fov = baseFov + kick * 34;
         if (Math.abs(camera.fov - fov) > 0.01) {
           camera.fov = fov;
           camera.updateProjectionMatrix();
+        }
+
+        // car speed → wheels, spray, HUD
+        const moved = carPrev.distanceTo(car.group.position);
+        carPrev.copy(car.group.position);
+        const carSpeed = moved < 30 ? moved / Math.max(dt, 1e-3) : 0;
+        speed += (Math.min(carSpeed, 95) + kick * 80 - speed) * Math.min(1, dt * 4);
+        for (const w of car.wheels) w.rotation.z -= (carSpeed * dt) / 0.36;
+        fwd.copy(carFwd);
+        sideV.crossVectors(up, carFwd).normalize();
+        leadPos.copy(car.group.position).addScaledVector(carFwd, -1.62);
+        leadPos.y = 0.3;
+
+        // rain light: glow sprite + a little red light on the wet ground
+        car.rainLight.getWorldPosition(tmpT);
+        const flash = reduce ? 1 : 0.7 + 0.3 * (Math.sin(time * 26) > 0 ? 1 : 0.35);
+        dyn.set([tmpT.x, tmpT.y, tmpT.z], 15);
+        dynCol.set([1.4 * flash, 0.2 * flash, 0.14 * flash], 15);
+        tailGlow.position.copy(tmpT).addScaledVector(carFwd, -0.9);
+        tailGlow.position.y = 0.15;
+        tailGlow.intensity = 1.2 * flash;
+        // gantry: five reds on the grid
+        const lightsOn = shown === 0 && !dim ? 1 : 0;
+        for (let i = 0; i < 5; i++) dynCol.set([red.r * lightsOn, red.g * lightsOn, red.b * lightsOn], i * 3);
+        dynGeo.attributes.position.needsUpdate = true;
+        dynGeo.attributes.aColor.needsUpdate = true;
+
+        const indoors = shown === 2;
+        rain.visible = !indoors;
+        spray.visible = !indoors;
+        const sp = Math.min(1, speed / 85);
+        streakU.uLen.value = sp * 14;
+        streakU.uOpacity.value = Math.max(0, sp - 0.15) * 0.9;
+        rainU.uTime.value = time;
+        rainU.uSpeed.value = speed;
+        sprayU.uTime.value = time;
+        sprayU.uAmount.value = Math.min(1, carSpeed / 60) * 0.95 + 0.05;
+        (sky.material as import("three").ShaderMaterial).uniforms.uTime.value = time;
+        flag.group.visible = shown === 5;
+        if (shown === 5) flag.update(time);
+        if (shown === 3 && Math.floor(time * 10) !== Math.floor((time - dt) * 10)) pitWall.draw(time);
+
+        renderer.render(scene, camera);
+
+        // HUD (≈12 Hz)
+        hudTick += dt;
+        if (hudTick > 0.08) {
+          hudTick = 0;
+          const kmh = Math.round(Math.min(342, speed * 3.6));
+          if (speedRef.current) speedRef.current.textContent = String(kmh).padStart(3, "0");
+          const gear = kmh < 6 ? "N" : String(Math.min(8, 1 + Math.floor(kmh / 42)));
+          if (gearRef.current) gearRef.current.textContent = gear;
+          if (lapRef.current) lapRef.current.style.transform = `scaleX(${pageProgress()})`;
+          const map = (pathRef.current as unknown as { __map?: (x: number, z: number) => [number, number] } | null)?.__map;
+          if (map && dotRef.current) {
+            const [mx, my] = map(car.group.position.x, car.group.position.z);
+            dotRef.current.setAttribute("cx", mx.toFixed(1));
+            dotRef.current.setAttribute("cy", my.toFixed(1));
+            dotRef.current.style.opacity = indoors ? "0" : "1";
+          }
         }
         if (veilRef.current) {
           const v = jump >= 0 ? Math.pow(kick, 2.2) : 0;
@@ -605,65 +773,9 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
           veilFrontRef.current.style.opacity = v.toFixed(3);
           veilFrontRef.current.style.transform = `scale(${(1.1 + kick * 0.35).toFixed(3)})`;
         }
-
-        const uu = ((u % 1) + 1) % 1;
-        curve.getPointAt(uu, p0);
-        curve.getTangentAt(uu, tan);
-        curve.getTangentAt((uu + 30 / L) % 1, tan2);
-        fwd.copy(tan);
-        sideV.crossVectors(up, tan).normalize();
-        const turn = tan.x * tan2.z - tan.z * tan2.x;
-
-        camPos.copy(p0).addScaledVector(up, 1.15 + Math.sin(time * 9) * 0.006 * Math.min(1, speed / 40));
-        curve.getPointAt((uu + 9 / L) % 1, leadPos);
-        leadPos.y = 0.62;
-        curve.getPointAt((uu + 34 / L) % 1, look);
-        look.y = 0.9;
-        camera.position.copy(camPos);
-        const roll = Math.max(-0.035, Math.min(0.035, turn * 0.08));
-        camera.up.set(-roll * sideV.x, 1, -roll * sideV.z).normalize();
-        camera.lookAt(look);
-
-        // gantry: five reds on the grid, lights out once the lap starts
-        const lightsOn = shownScene === 0 && !dim ? 1 : 0;
-        for (let i = 0; i < 5; i++) dynCol.set([red.r * lightsOn, red.g * lightsOn, red.b * lightsOn], i * 3);
-        // rain light: steady glow with the rain-light flash
-        const flash = reduce ? 1 : 0.7 + 0.3 * (Math.sin(time * 26) > 0 ? 1 : 0.35);
-        dyn.set([leadPos.x, leadPos.y, leadPos.z], 15);
-        dynCol.set([1.6 * flash, 0.22 * flash, 0.16 * flash], 15);
-        dynGeo.attributes.position.needsUpdate = true;
-        dynGeo.attributes.aColor.needsUpdate = true;
-
-        const sp = Math.min(1, speed / 85);
-        streakU.uLen.value = sp * 14;
-        streakU.uOpacity.value = Math.max(0, sp - 0.15) * 0.9;
-        rainU.uTime.value = time;
-        rainU.uSpeed.value = speed;
-        sprayU.uTime.value = time;
-        sprayU.uAmount.value = 0.25 + sp * 0.9;
-        (sky.material as import("three").ShaderMaterial).uniforms.uTime.value = time;
-
-        renderer.render(scene, camera);
-
-        // HUD (≈12 Hz)
-        hudTick += dt;
-        if (hudTick > 0.08) {
-          hudTick = 0;
-          const kmh = Math.round(Math.min(342, speed * 3.6 * 1.6));
-          if (speedRef.current) speedRef.current.textContent = String(kmh).padStart(3, "0");
-          const gear = kmh < 6 ? "N" : String(Math.min(8, 1 + Math.floor(kmh / 42)));
-          if (gearRef.current) gearRef.current.textContent = gear;
-          if (lapRef.current) lapRef.current.style.transform = `scaleX(${pageProgress()})`;
-          const map = (pathRef.current as unknown as { __map?: (x: number, z: number) => [number, number] } | null)?.__map;
-          if (map && dotRef.current) {
-            const [mx, my] = map(p0.x, p0.z);
-            dotRef.current.setAttribute("cx", mx.toFixed(1));
-            dotRef.current.setAttribute("cy", my.toFixed(1));
-          }
-        }
-        if (shownScene !== shownSector) {
-          shownSector = shownScene;
-          setSector(shownScene);
+        if (shown !== shownLabel) {
+          shownLabel = shown;
+          setSector(shown);
         }
         if (!ready) {
           ready = true;
@@ -728,7 +840,7 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
               </p>
             </div>
             <div className="border-l border-line pl-4">
-              <p className="hud-label">{SECTORS[sector]}</p>
+              <p className="hud-label">{PLACES[sector]}</p>
               <svg viewBox="0 0 100 64" className="mt-1 h-10 w-[4.2rem]">
                 <path ref={pathRef} fill="none" stroke="rgb(255 255 255 / 0.28)" strokeWidth="1.4" />
                 <circle ref={dotRef} r="2.6" fill="#ff3b30" />

@@ -7,7 +7,7 @@ import { ArrowUpRight } from "@/components/ui/Icons";
 
 export function Services() {
   return (
-    <section id="products" data-scene="3" aria-labelledby="products-title" className="py-24 md:py-36">
+    <section id="products" data-scene="4" aria-labelledby="products-title" className="py-24 md:py-36">
       <div className="container-x">
         <SectionHeading
           index={sectionIndex("products")}

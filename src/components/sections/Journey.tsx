@@ -55,7 +55,7 @@ function Timeline({ items }: { items: TimelineItem[] }) {
 
 export function Journey() {
   return (
-    <section id="experience" data-scene="3" aria-labelledby="experience-title" className="container-x py-24 md:py-36">
+    <section id="experience" data-scene="4" aria-labelledby="experience-title" className="container-x py-24 md:py-36">
       <SectionHeading
         index={sectionIndex("experience")}
         label="Experience & education"
