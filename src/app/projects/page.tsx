@@ -14,7 +14,7 @@ export default function ProjectsPage() {
   const categories = Array.from(new Set(projects.filter((p) => !p.placeholder).map((p) => p.category)));
 
   return (
-    <section className="container-x pb-24 pt-36 md:pb-32 md:pt-44">
+        <section className="container-x pb-24 pt-36 md:pb-32 md:pt-44">
       <Reveal>
         <p className="eyebrow flex items-center gap-3">
           <span>Index</span>
@@ -23,7 +23,7 @@ export default function ProjectsPage() {
         </p>
       </Reveal>
       <Reveal delay={80}>
-        <h1 className="title-xl mt-6 text-[clamp(4rem,12vw,10rem)]">
+        <h1 className="title-xl mt-6 text-[clamp(2.75rem,8vw,6.5rem)]">
           All projects<span className="text-muted">.</span>
         </h1>
       </Reveal>
@@ -45,5 +45,5 @@ export default function ProjectsPage() {
         ))}
       </div>
     </section>
-  );
+      );
 }

@@ -49,11 +49,17 @@ export function Navbar() {
     };
   }, [open]);
 
+  // Leaving a project page plays the reverse "dimension jump".
+  const back = pathname === "/" ? undefined : ["leave-project"];
+
   const isActive = (href: string) =>
     pathname === "/" ? active === `#${href.split("#")[1]}` : href === "/#portfolio" && pathname.startsWith("/projects");
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5">
+    <header
+      style={{ viewTransitionName: "site-header" }}
+      className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5"
+    >
       <nav
         aria-label="Main"
         className={`pointer-events-auto mx-auto flex max-w-[64rem] items-center justify-between rounded-full border py-2 pl-5 pr-2 transition-all duration-700 ease-[var(--ease-out-expo)] ${
@@ -62,7 +68,7 @@ export function Navbar() {
             : "border-transparent bg-surface/60 backdrop-blur-md"
         }`}
       >
-        <Link href="/#home" className="text-[1.0625rem] font-semibold tracking-[-0.03em]" aria-label={`${profile.name} — home`}>
+        <Link href="/#home" transitionTypes={back} className="text-[1.0625rem] font-semibold tracking-[-0.03em]" aria-label={`${profile.name} — home`}>
           {profile.brand}
         </Link>
 
@@ -70,6 +76,7 @@ export function Navbar() {
           {navigation.map((item) => (
             <li key={item.href}>
               <Link
+                transitionTypes={back}
                 href={item.href}
                 aria-current={isActive(item.href) ? "true" : undefined}
                 className={`relative rounded-full px-4 py-2 text-[0.9rem] transition-colors duration-300 ${
@@ -83,7 +90,7 @@ export function Navbar() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <Link href="/#contact" className="btn btn-dark hidden !h-10 !px-4 text-sm sm:inline-flex">
+          <Link href="/#contact" transitionTypes={back} className="btn btn-dark hidden !h-10 !px-4 text-sm sm:inline-flex">
             Let&apos;s collaborate
             <ArrowUpRight size={15} className="btn-icon" />
           </Link>
@@ -111,6 +118,7 @@ export function Navbar() {
           {navigation.map((item, i) => (
             <li key={item.href}>
               <Link
+                transitionTypes={back}
                 href={item.href}
                 onClick={() => setOpen(false)}
                 tabIndex={open ? 0 : -1}
@@ -124,6 +132,7 @@ export function Navbar() {
         </ul>
         <div className="border-t border-line p-3">
           <Link
+                transitionTypes={back}
             href="/#contact"
             onClick={() => setOpen(false)}
             tabIndex={open ? 0 : -1}

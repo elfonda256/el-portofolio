@@ -1,4 +1,6 @@
-/** Re-mounts on every navigation, giving each page a soft fade-in. */
+import { PageTransition } from "@/components/scene/PageTransition";
+
+/** Re-mounts on every navigation — the boundary for page-to-page transitions. */
 export default function Template({ children }: { children: React.ReactNode }) {
-  return <div className="animate-page">{children}</div>;
+  return <PageTransition>{children}</PageTransition>;
 }

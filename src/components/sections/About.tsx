@@ -35,7 +35,7 @@ export function About() {
             </p>
           </Reveal>
           <Reveal delay={80}>
-            <h2 id="about-title" className="title-xl text-[clamp(3rem,7vw,6.5rem)]">
+            <h2 id="about-title" className="title-xl text-[clamp(2.2rem,4.6vw,4.4rem)]">
               Between the field <span className="text-muted">and the software.</span>
             </h2>
           </Reveal>

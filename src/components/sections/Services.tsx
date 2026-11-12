@@ -28,7 +28,7 @@ export function Services() {
         <div className="grid gap-6 md:grid-cols-3">
           {services.map((s, i) => (
             <Reveal key={s.title} delay={i * 90} className="h-full">
-              <article className="group flex h-full flex-col overflow-hidden glass rounded-[var(--radius-card)] transition-all duration-700 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-signal/40 hover:shadow-[0_30px_80px_-40px_rgb(127_227_255/0.45)]">
+              <article className="group flex h-full flex-col overflow-hidden glass rounded-[var(--radius-card)] transition-all duration-700 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-signal/40 hover:shadow-[0_30px_80px_-40px_rgb(255_59_48/0.45)]">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <div className="absolute inset-0 transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]">
                     <ProjectCover cover={s.cover} uid={`svc-${i}`} label={`Illustration for ${s.title}`} />

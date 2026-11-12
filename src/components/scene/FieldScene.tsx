@@ -28,6 +28,7 @@ const vertex = /* glsl */ `
   uniform float uFlow;
   uniform float uWave;
   uniform float uAlpha;
+  uniform float uBurst;
   attribute vec3 aP1;
   attribute vec3 aP2;
   attribute vec3 aP3;
@@ -79,6 +80,9 @@ const vertex = /* glsl */ `
       cos(uTime * 0.45 + aRnd.z * 6.283),
       sin(uTime * 0.35 + aRnd.x * 6.283)
     ) * drift;
+
+    // dimension jump: the cloud scatters outward, then settles into its new shape
+    p += normalize(p + vec3(0.001)) * uBurst * (1.5 + aRnd.x * 6.0);
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -148,7 +152,10 @@ function readTarget(sections: { el: HTMLElement; scene: number }[]) {
   return sections[sections.length - 1].scene;
 }
 
-export function FieldScene() {
+// Survives client-side navigation so the next page's cloud morphs on from this one.
+let lastMorph: number | null = null;
+
+export function FieldScene({ dim = false }: { dim?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [label, setLabel] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -199,7 +206,8 @@ export function FieldScene() {
         uMorph: { value: 0 },
         uTime: { value: 0 },
         uSize: { value: small ? 0.85 : 1 },
-        uAlpha: { value: small ? 0.5 : 0.9 },
+        uAlpha: { value: (small ? 0.5 : 0.9) * (dim ? 0.6 : 1) },
+        uBurst: { value: 0 },
         uPixel: { value: dpr },
         uScan: { value: 1 },
         uFlow: { value: 0 },
@@ -251,7 +259,9 @@ export function FieldScene() {
       };
       window.addEventListener("pointermove", onPointer, { passive: true });
 
-      let morph = readTarget(sections);
+      const arriving = lastMorph !== null;
+      let morph = arriving ? (lastMorph as number) : readTarget(sections);
+      let burst = arriving && !reduce ? 1 : 0;
       let spin = 0;
       let last = performance.now();
       let time = 0;
@@ -269,6 +279,9 @@ export function FieldScene() {
         morph = reduce ? target : morph + (target - morph) * Math.min(1, dt * 2.6);
 
         uniforms.uMorph.value = morph;
+        lastMorph = morph;
+        burst = Math.max(0, burst - dt * 0.9);
+        uniforms.uBurst.value = burst * burst;
         uniforms.uTime.value = time;
         uniforms.uScan.value = Math.max(0, 1 - Math.abs(morph - 0)) + Math.max(0, 1 - Math.abs(morph - 2));
         uniforms.uFlow.value = Math.max(0, 1 - Math.abs(morph - 1));

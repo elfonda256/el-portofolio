@@ -35,7 +35,7 @@ export function Intro() {
         {/* Main */}
         <div>
           <Reveal>
-            <h2 id="intro-title" className="title-xl text-[clamp(3rem,7.4vw,7rem)]">
+            <h2 id="intro-title" className="title-xl text-[clamp(2.2rem,4.6vw,4.4rem)]">
               {lead}
               {rest.length > 0 && (
                 <>
@@ -82,7 +82,7 @@ export function Intro() {
               <Reveal key={s.label} delay={i * 90} className="bg-canvas/75 p-6 md:p-8">
                 <dt className="sr-only">{s.label}</dt>
                 <dd>
-                  <p className="title-xl text-[clamp(3rem,5.5vw,4.5rem)] !leading-none">
+                  <p className="title-xl text-[clamp(1.9rem,3vw,2.75rem)] whitespace-nowrap !leading-none">
                     {s.value}
                     {"unit" in s && <span className="ml-1.5 text-base font-medium tracking-normal text-muted">{s.unit}</span>}
                   </p>

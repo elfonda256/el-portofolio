@@ -8,6 +8,10 @@ import { ProjectMedia } from "@/components/ui/ProjectCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { Gallery } from "@/components/ui/Gallery";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@/components/ui/Icons";
+import { TrackScene } from "@/components/scene/TrackScene";
+import { SharedMedia } from "@/components/scene/PageTransition";
+
+
 
 type Params = { slug: string };
 
@@ -52,56 +56,61 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
   ].filter(Boolean) as { label: string; value: string }[];
 
   return (
-    <article className="pb-24 pt-32 md:pb-32 md:pt-40">
+    <>
+    <TrackScene dim />
+        <article className="pb-24 pt-24 md:pb-32 md:pt-28">
       <div className="container-x">
         <Reveal>
-          <Link href="/projects" className="group inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
+          <Link href="/projects" transitionTypes={["leave-project"]} className="group inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
             <ArrowLeft size={15} className="transition-transform duration-500 group-hover:-translate-x-1" />
             All projects
           </Link>
         </Reveal>
 
-        <header className="mt-10 grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-end lg:gap-16">
-          <div>
-            <Reveal>
-              <p className="eyebrow">
-                {project.category} · {project.year}
-              </p>
-            </Reveal>
-            <Reveal delay={80}>
-              <h1 className="title-xl mt-5 text-[clamp(3.5rem,9vw,8rem)]">{project.title}</h1>
-            </Reveal>
-          </div>
-          <Reveal delay={140}>
-            <p className="text-lg leading-relaxed text-muted">{project.summary}</p>
-            {project.links && project.links.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-3">
-                {project.links.map((l) => (
-                  <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="btn btn-dark">
-                    {l.label} <ArrowUpRight size={15} className="btn-icon" />
-                  </a>
-                ))}
-              </div>
-            )}
-          </Reveal>
-        </header>
+        {/* The project "screen" — the same image the visitor clicked morphs into this. */}
+        <SharedMedia
+          slug={project.slug}
+          active
+          className="hud-frame relative mt-6 h-[min(64svh,44rem)] min-h-[24rem] overflow-hidden rounded-[2rem] border border-signal/25 bg-stone shadow-[0_40px_120px_-40px_rgb(255_59_48/0.35)]"
+        >
+          {project.hero ? (
+            <Image
+              src={project.hero.src}
+              alt={project.hero.alt}
+              fill
+              priority
+              sizes="100vw"
+              style={project.hero.position ? { objectPosition: project.hero.position } : undefined}
+              className="object-cover"
+            />
+          ) : (
+            <ProjectMedia project={project} sizes="100vw" priority />
+          )}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgb(4_6_10/0.15)_0%,transparent_35%,rgb(4_6_10/0.9)_100%)]"
+          />
+          <header className="absolute inset-x-0 bottom-0 p-6 md:p-10">
+            <p className="hud-label !text-white/70">
+              {project.category} · {project.year}
+            </p>
+            <h1 className="title-xl mt-4 max-w-5xl text-[clamp(2.2rem,5.4vw,5rem)] [text-shadow:0_4px_40px_rgb(0_0_0/0.5)]">
+              {project.title}
+            </h1>
+          </header>
+        </SharedMedia>
 
-        <Reveal delay={100} className="mt-14">
-          <div className="relative aspect-[16/10] overflow-hidden rounded-[2rem] border border-line/60 bg-stone md:aspect-[16/8]">
-            {project.hero ? (
-              <Image
-                src={project.hero.src}
-                alt={project.hero.alt}
-                fill
-                priority
-                sizes="100vw"
-                style={project.hero.position ? { objectPosition: project.hero.position } : undefined}
-                className="object-cover"
-              />
-            ) : (
-              <ProjectMedia project={project} sizes="100vw" priority />
-            )}
-          </div>
+        <Reveal className="mt-10 grid gap-6 lg:grid-cols-[1.5fr_1fr] lg:items-start lg:gap-16">
+          <p className="text-[clamp(1.125rem,1.6vw,1.375rem)] leading-relaxed text-ink/85">{project.summary}</p>
+          {project.links && project.links.length > 0 && (
+            <div className="flex flex-wrap gap-3 lg:justify-end">
+              {project.links.map((l) => (
+                <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="btn btn-dark">
+                  {l.label} <ArrowUpRight size={15} className="btn-icon" />
+                </a>
+              ))}
+            </div>
+          )}
         </Reveal>
 
         <div className="mt-16 grid gap-14 lg:grid-cols-[1fr_2fr] lg:gap-20">
@@ -179,7 +188,8 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
           <Reveal className="mt-24">
             <Link
               href={`/projects/${next.slug}`}
-              className="group flex flex-col gap-6 rounded-[2rem] border border-line bg-surface p-6 transition-shadow duration-700 hover:shadow-[var(--shadow-lift)] sm:flex-row sm:items-center md:p-8"
+              transitionTypes={["enter-project"]}
+              className="group flex flex-col gap-6 glass rounded-[2rem] p-6 transition-shadow duration-700 hover:shadow-[var(--shadow-lift)] sm:flex-row sm:items-center md:p-8"
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl sm:w-56">
                 <div className="absolute inset-0 transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]">
@@ -199,5 +209,6 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
         )}
       </div>
     </article>
+        </>
   );
 }

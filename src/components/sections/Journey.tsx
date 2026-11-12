@@ -13,7 +13,7 @@ function Timeline({ items }: { items: TimelineItem[] }) {
         <li key={item.title + item.organization} className="relative grid gap-3 pb-14 pl-8 last:pb-0 md:grid-cols-[11rem_1fr] md:gap-10 md:pl-0">
           {/* rail + node */}
           <span aria-hidden="true" className="absolute bottom-0 left-[5px] top-2 w-px bg-line md:left-[calc(11rem+1.25rem-0.5px)] [li:last-child_&]:hidden" />
-          <span aria-hidden="true" className="absolute left-0 top-[0.45rem] size-[11px] rounded-full border-2 border-signal bg-canvas shadow-[0_0_12px_rgb(127_227_255/0.6)] md:left-[calc(11rem+1.25rem-5.5px)]" />
+          <span aria-hidden="true" className="absolute left-0 top-[0.45rem] size-[11px] rounded-full border-2 border-signal bg-canvas shadow-[0_0_12px_rgb(255_59_48/0.6)] md:left-[calc(11rem+1.25rem-5.5px)]" />
 
           <Reveal delay={i * 40}>
             <p className="font-mono text-[0.8125rem] uppercase tracking-[0.04em] text-muted md:pt-0.5 md:text-right">{item.period}</p>

@@ -18,7 +18,7 @@ export function Contact() {
           </Reveal>
 
           <Reveal delay={80}>
-            <h2 id="contact-title" className="title-xl mt-8 max-w-6xl text-[clamp(4rem,13vw,12rem)] [text-shadow:0_0_80px_rgb(127_227_255/0.2)]">
+            <h2 id="contact-title" className="title-xl mt-8 max-w-6xl text-[clamp(2.75rem,8vw,7.5rem)] [text-shadow:0_0_80px_rgb(255_59_48/0.2)]">
               Let&apos;s build something <span className="text-white/45">that works.</span>
             </h2>
           </Reveal>

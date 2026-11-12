@@ -36,13 +36,13 @@ export function Hero() {
       id="home"
       data-scene="0"
       aria-labelledby="hero-title"
-      className="relative flex min-h-[100svh] flex-col justify-end pb-10 pt-28 md:pb-14"
+      className="relative flex min-h-[100svh] flex-col justify-end pb-10 pt-28 md:pb-28"
     >
       {/* HUD readouts */}
       <div aria-hidden="true" className="container-x pointer-events-none absolute inset-x-0 top-24 hidden justify-between md:flex">
         <div className="animate-fade space-y-1.5 [animation-delay:1200ms]">
-          <p className="hud-label">Scan 01 · Field</p>
-          <p className="hud-label text-white/30">Lidar · 16 ch · 360°</p>
+          <p className="hud-label">Lap 01 · Night session</p>
+          <p className="hud-label text-white/30">Track wet · Rain light on</p>
         </div>
         <div className="animate-fade space-y-1.5 text-right [animation-delay:1300ms]">
           <p className="hud-label">{profile.location}</p>
@@ -55,12 +55,12 @@ export function Hero() {
           <span className="sr-only">
             {profile.name} — {profile.title}
           </span>
-          <span className="title-xl block select-none text-[clamp(6.5rem,26vw,26rem)] text-ink [text-shadow:0_0_80px_rgb(127_227_255/0.18)]">
+          <span className="title-xl block select-none text-[clamp(4.25rem,17vw,17rem)] text-ink [text-shadow:0_0_60px_rgb(0_0_0/0.6)]">
             <RevealWord word={profile.firstName.toUpperCase()} />
           </span>
           <span
             aria-hidden="true"
-            className="title-xl title-thin mt-2 block animate-fade text-[clamp(1.6rem,4.6vw,4.25rem)] tracking-[0.04em] text-white/70 [animation-delay:700ms]"
+            className="title-xl title-thin mt-3 block animate-fade text-[clamp(1.1rem,3vw,2.75rem)] text-white/70 [animation-delay:700ms]"
           >
             {rest.join(" ") || first}
           </span>

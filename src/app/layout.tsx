@@ -5,13 +5,15 @@ import { GeistMono } from "geist/font/mono";
 import { Analytics } from "@vercel/analytics/next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ClickOrigin } from "@/components/scene/ClickOrigin";
 import { profile, site, socials, contact } from "@/data/site";
 import "./globals.css";
 
-const bigShoulders = localFont({
-  src: "./fonts/BigShoulders-Variable.woff2",
+const archivo = localFont({
+  src: "./fonts/Archivo-Italic-Variable.woff2",
   weight: "100 900",
-  variable: "--font-big-shoulders",
+  style: "italic",
+  variable: "--font-archivo",
   display: "swap",
 });
 
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04060a",
+  themeColor: "#060708",
   width: "device-width",
   initialScale: 1,
 };
@@ -70,7 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${caveat.variable} ${bigShoulders.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable} ${caveat.variable} ${archivo.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -91,6 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
+        <ClickOrigin />
         <Navbar />
         <main id="main">{children}</main>
         <Footer />

@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Project } from "@/data/types";
 import { ProjectCover } from "./ProjectCover";
 import { ArrowUpRight } from "./Icons";
+import { SharedMedia } from "@/components/scene/PageTransition";
 
 export function ProjectMedia({ project, sizes, priority = false }: { project: Project; sizes: string; priority?: boolean }) {
   return project.image ? (
@@ -38,8 +39,11 @@ export function ProjectCard({ project }: { project: Project }) {
 
   return (
     <article className="h-full">
-      <Link href={`/projects/${project.slug}`} className="group flex h-full flex-col" aria-label={`View project: ${project.title}`}>
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] border border-line/60 bg-stone shadow-[var(--shadow-soft)] transition-shadow duration-700 ease-[var(--ease-out-expo)] group-hover:shadow-[var(--shadow-lift)]">
+      <Link href={`/projects/${project.slug}`} transitionTypes={["enter-project"]} className="group flex h-full flex-col" aria-label={`View project: ${project.title}`}>
+        <SharedMedia
+          slug={project.slug}
+          className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] border border-line/60 bg-stone shadow-[var(--shadow-soft)] transition-shadow duration-700 ease-[var(--ease-out-expo)] group-hover:shadow-[var(--shadow-lift)]"
+        >
           <div className="absolute inset-0 transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]">
             <ProjectMedia project={project} sizes="(min-width:1024px) 33vw, (min-width:768px) 50vw, 100vw" />
           </div>
@@ -49,7 +53,7 @@ export function ProjectCard({ project }: { project: Project }) {
           <span className="absolute bottom-4 right-4 inline-flex translate-y-2 items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-sm font-medium text-canvas opacity-0 transition-all duration-500 ease-[var(--ease-out-expo)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
             View project <ArrowUpRight size={14} />
           </span>
-        </div>
+        </SharedMedia>
 
         <div className="mt-5 flex flex-1 flex-col px-1">
           <div className="flex items-baseline justify-between gap-4">

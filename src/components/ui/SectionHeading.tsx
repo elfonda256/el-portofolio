@@ -21,7 +21,7 @@ export function SectionHeading({ index, label, title, aside, id }: SectionHeadin
           </p>
         </Reveal>
         <Reveal delay={80}>
-          <h2 id={id} className="title-xl text-[clamp(3.25rem,9vw,8.5rem)]">
+          <h2 id={id} className="title-xl text-[clamp(2.4rem,6vw,5.75rem)]">
             {title}
           </h2>
         </Reveal>
