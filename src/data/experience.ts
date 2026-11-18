@@ -12,9 +12,22 @@ export const experience: TimelineItem[] = [
       "Deliver production web applications for paying clients, owning the full lifecycle from requirements gathering to deployment and post-launch improvement.",
     points: [
       "Sole developer of an enterprise catering platform for a business producing ~8,000 meals per day — ordering, procurement, inventory, warehouse and approvals.",
+      "Built with AI coding agents under a written governance workflow (project rules, decision log, approval gates per phase): server-enforced pricing and payment rules, secure admin login with rate limiting, unit tests.",
       "Responsive company profile websites for commercial clients, including contractor firms, from requirements and UI/UX through deployment and revisions.",
     ],
     tags: ["Next.js", "TypeScript", "PostgreSQL", "Prisma", "Supabase", "Vercel"],
+  },
+  {
+    title: "Business Partner",
+    organization: "Maudy Network Komunikasi",
+    context: "IT & Telecommunications Infrastructure",
+    location: "Semarang, Indonesia",
+    period: "2025 – Present",
+    points: [
+      "Handle programming, system framework design and project planning for the company's IT and telecommunications infrastructure work.",
+      "Built the company's AI products: Xtur, an AI CCTV analytics platform, and Aegis AI, a self-hosted LLM platform.",
+    ],
+    tags: ["YOLOv8", "LLM", "Ollama", "Docker", "System Design"],
   },
   {
     title: "Telemetry Engineer",

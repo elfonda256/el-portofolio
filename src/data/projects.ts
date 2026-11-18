@@ -12,6 +12,64 @@ import { library as ph } from "./photos";
  */
 export const projects: Project[] = [
   {
+    slug: "smartmoney-voice-finance",
+    title: "SmartMoney AI Assistant",
+    category: "Applied AI",
+    year: "2026",
+    summary:
+      "A voice-first family finance app in Indonesian. Common commands are parsed on the device; open-ended questions are answered by Google Gemini from the family's own numbers.",
+    overview: [
+      "SmartMoney lets a family record income and expenses and ask about their money by voice, in Indonesian. Saying \"Catat makan siang 50 ribu dari cash\" prepares a transaction to confirm; asking \"Apakah saya lebih boros dari bulan lalu?\" gets a spoken answer.",
+      "Common commands go through a fast, deterministic intent and amount parser. Questions it cannot handle go to a server-side route that sends the Gemini API an aggregated snapshot of the family's finances — totals only, without transaction descriptions, account numbers or names — and asks for a short answer grounded in those numbers. The API key never reaches the browser.",
+    ],
+    role: "Developer — design, build and deployment",
+    highlights: [
+      "Rules first, LLM second: a custom Indonesian intent and amount parser handles everyday commands; only open-ended questions reach the model.",
+      "Grounded answers from a privacy-safe, aggregated data snapshot, validated server-side with clear error responses.",
+      "Speech-to-text and text-to-speech with the Web Speech API; receipt scanning with Tesseract.js OCR.",
+      "Family profiles, budgets, savings goals, debts and receivables, reports with PDF / CSV export.",
+    ],
+    stack: ["Next.js", "TypeScript", "Google Gemini API", "Web Speech API", "Tesseract.js", "Supabase", "Vercel"],
+    links: [
+      { label: "Live demo", href: "https://smart-money-management.vercel.app" },
+      { label: "Source on GitHub", href: "https://github.com/elfonda256/smart-money-management" },
+    ],
+    image: ph.smartMoneyDashboard.src,
+    imageAlt: ph.smartMoneyDashboard.alt,
+    hero: ph.smartMoneyDashboard,
+    gallery: [ph.smartMoneyDashboard, ph.smartMoneyReports],
+    cover: "website",
+    featured: true,
+  },
+  {
+    slug: "xtur-ai-cctv",
+    title: "Xtur AI CCTV Analytics",
+    category: "Applied AI",
+    year: "2026",
+    summary:
+      "Multi-camera security analytics that detects and tracks people and vehicles in real time with YOLOv8 and DeepSORT, at about 4 ms of inference per frame.",
+    overview: [
+      "Xtur turns ordinary CCTV cameras into a monitoring system. It ingests RTSP streams, detects people, cars, motorcycles, trucks and buses with YOLOv8, and follows each object across frames with DeepSORT, so every detection carries a track ID.",
+      "Around the AI engine sits a full web platform: a live overview, detection logs with review flags and CSV / PDF export, traffic analytics, multi-tenant camera management, and an engine health page that shows CPU, RAM, the Redis stream buffer and inference latency in real time. Built for Maudy Network Komunikasi.",
+    ],
+    role: "Designer and developer — AI pipeline, backend and dashboard",
+    context: "Maudy Network Komunikasi",
+    highlights: [
+      "YOLOv8 object detection with DeepSORT tracking on PyTorch with CUDA, about 4 ms inference per frame.",
+      "Age and gender analysis with DeepFace, and Indonesian licence plate recognition with EasyOCR.",
+      "RTSP ingestion through MediaMTX with a rate-limited frame pipeline buffered in Redis streams.",
+      "Multi-tenant, dual-stream camera management; detection logs with CSV / PDF export; analytics and live engine health.",
+    ],
+    stack: ["YOLOv8", "DeepSORT", "DeepFace", "EasyOCR", "PyTorch", "CUDA", "Redis", "PostgreSQL", "Prisma", "MediaMTX"],
+    links: [{ label: "Platform (login required)", href: "https://xtur.exac.site" }],
+    image: ph.xturOverview.src,
+    imageAlt: ph.xturOverview.alt,
+    hero: ph.xturOverview,
+    gallery: [ph.xturOverview, ph.xturLogs, ph.xturCameras, ph.xturEngine],
+    cover: "vision",
+    featured: true,
+  },
+  {
     slug: "rentang-irrigation-telemetry",
     title: "Rentang Irrigation Telemetry",
     category: "Industrial IoT",
@@ -113,7 +171,6 @@ export const projects: Project[] = [
     hero: ph.pancalinggaHero,
     gallery: [ph.pancalinggaHero],
     cover: "website",
-    featured: true,
   },
   {
     slug: "amr-lidar-slam",
@@ -189,7 +246,7 @@ export const projects: Project[] = [
     hero: ph.amrPresentation,
     gallery: [ph.amrLoadTest, ph.amrPresentation, ph.agvChassis],
     cover: "jetson",
-    featured: true,
+    
   },
   {
     slug: "early-robotics",
@@ -204,19 +261,48 @@ export const projects: Project[] = [
     stack: ["Arduino", "C/C++", "PID Control"],
     cover: "robot",
   },
-  // ── Placeholder: replace with your next project (GitHub repo, robotics, etc.) ──
   {
-    slug: "next-project",
-    title: "Your next project",
-    category: "Coming soon",
-    year: "—",
+    slug: "aegis-ai",
+    title: "Aegis AI Platform",
+    category: "Applied AI",
+    year: "2026",
     summary:
-      "Placeholder slot. More GitHub repositories, software and robotics projects will be added here.",
-    overview: ["This is a placeholder. Edit src/data/projects.ts to replace it with a real project."],
-    highlights: [],
-    stack: [],
-    cover: "placeholder",
-    placeholder: true,
+      "A private AI workspace that combines local LLMs with an autonomous agent, served through Open WebUI behind a reverse proxy.",
+    overview: [
+      "Aegis AI is a self-hosted AI workspace for Maudy Network Komunikasi. Local models served by Ollama (Gemma, Qwen) handle fast conversations, while an autonomous agent (Hermes Agent) takes on multi-step, tool-assisted tasks — all on the company's own infrastructure.",
+      "To connect the agent to Open WebUI, I wrote an OpenAI-compatible bridge that exposes /v1/chat/completions, streams the agent's output and mirrors the files it generates so they render inside the chat.",
+    ],
+    role: "Developer — deployment, integration and branding",
+    context: "Maudy Network Komunikasi",
+    highlights: [
+      "Local LLM inference with Ollama (Gemma, Qwen) alongside an autonomous agent for multi-step work.",
+      "OpenAI-compatible bridge with streaming and media hand-off into Open WebUI.",
+      "Containerised deployment with Docker behind Coolify / Traefik.",
+    ],
+    stack: ["Open WebUI", "Ollama", "Gemma", "Qwen", "Hermes Agent", "Python", "Docker", "Coolify", "Traefik"],
+    links: [{ label: "Source on GitHub", href: "https://github.com/elfonda256/Aegis-AI" }],
+    cover: "website",
+  },
+  {
+    slug: "talentlens-ai",
+    title: "TalentLens AI (in progress)",
+    category: "Applied AI",
+    year: "2026",
+    summary:
+      "A proof of concept that screens and ranks CVs against a job opening, with a reason for every score. The CV parsing API is complete.",
+    overview: [
+      "TalentLens AI aims to help recruiters screen applicants faster without losing transparency: every ranking comes with the reasons behind it.",
+      "The first milestone is done: a FastAPI service that accepts CVs as PDF, DOCX or text — including scanned files through OCR — and returns a structured profile, with personal-data handling and tests against a set of synthetic CVs. A Next.js frontend shows the service status; matching and ranking are next.",
+    ],
+    role: "Developer",
+    highlights: [
+      "CV parsing API for PDF, DOCX, TXT and scanned files (Tesseract OCR).",
+      "Skill taxonomy with aliases, PII handling and snapshot tests on synthetic CVs.",
+      "FastAPI backend and Next.js frontend, run together with Docker Compose.",
+    ],
+    stack: ["Python", "FastAPI", "Pydantic", "Next.js", "Tailwind CSS", "Tesseract OCR", "Docker Compose", "pytest"],
+    links: [{ label: "Source on GitHub", href: "https://github.com/elfonda256/talentlens-ai" }],
+    cover: "website",
   },
 ];
 

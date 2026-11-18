@@ -28,7 +28,7 @@ export function Portfolio() {
         }
         aside={
           <p className="text-[1.0625rem] leading-relaxed text-muted">
-            Selected work across Industrial IoT, enterprise software and robotics — from irrigation telemetry to
+            Selected work across applied AI, enterprise software, Industrial IoT and robotics — from LLM apps and irrigation telemetry to
             platforms running daily operations.
           </p>
         }

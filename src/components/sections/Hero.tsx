@@ -46,7 +46,7 @@ export function Hero() {
         </div>
         <div className="animate-fade space-y-1.5 text-right [animation-delay:1300ms]">
           <p className="hud-label">{profile.location}</p>
-          <p className="hud-label text-white/30">Telemetry · Robotics · Software</p>
+          <p className="hud-label text-white/30">AI · Software · Automation</p>
         </div>
       </div>
 

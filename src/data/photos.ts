@@ -192,6 +192,52 @@ export const library = {
     width: 1280,
     height: 765,
   },
+  // ── SmartMoney (voice-first finance assistant) ───────────────
+  smartMoneyDashboard: {
+    src: "/images/projects/smartmoney-dashboard.jpg",
+    alt: "SmartMoney dashboard with a spoken financial briefing, balance, income, spending and savings cards, and AI insights",
+    caption: "Dashboard with the assistant's spoken financial briefing",
+    width: 1600,
+    height: 830,
+  },
+  smartMoneyReports: {
+    src: "/images/projects/smartmoney-reports.jpg",
+    alt: "SmartMoney reports page with an AI voice summary, period totals and export to PDF and CSV",
+    caption: "Reports with an AI voice summary and PDF / CSV export",
+    width: 1600,
+    height: 720,
+  },
+
+  // ── Xtur (AI CCTV analytics) ─────────────────────────────────
+  xturOverview: {
+    src: "/images/projects/xtur-overview.jpg",
+    alt: "Xtur overview with camera and stream status, and a 7-day chart of detected people and vehicles",
+    caption: "Overview: camera health and a 7-day history of detections",
+    width: 1600,
+    height: 871,
+  },
+  xturLogs: {
+    src: "/images/projects/xtur-detection-logs.jpg",
+    alt: "Xtur detection log table with object class, track ID, camera and confidence, plus CSV and PDF export",
+    caption: "Detection logs with track IDs, confidence and CSV / PDF export",
+    width: 1600,
+    height: 900,
+  },
+  xturCameras: {
+    src: "/images/projects/xtur-cameras.jpg",
+    alt: "Xtur camera management with four online dual-stream cameras and their detection classes",
+    caption: "Multi-camera management with dual streams per camera",
+    width: 1600,
+    height: 900,
+  },
+  xturEngine: {
+    src: "/images/projects/xtur-engine-health.jpg",
+    alt: "Xtur engine health page showing CPU, RAM, Redis buffer and about 4 ms AI inference latency per frame",
+    caption: "Engine health: CPU, RAM, Redis stream buffer and ~4 ms inference per frame",
+    width: 1600,
+    height: 900,
+  },
+
   // ── ITS: education & campus activities ───────────────────────
   gpblSit: {
     src: "/images/education/gpbl-sit-energy-monitoring.jpg",

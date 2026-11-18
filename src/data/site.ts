@@ -3,22 +3,22 @@ import { library } from "./photos";
 
 /**
  * Personal information & contact — the single source of truth for identity.
- * Source: CV (Elfano Sultan Syahbana, v2).
+ * Source: CV (Elfano Sultan Syahbana, Nov 2026).
  */
 export const profile = {
   name: "Elfano Sultan Syahbana",
   firstName: "Elfano",
   lastName: "Syahbana",
   brand: "Elfano.",
-  title: "Automation & Software Engineer",
-  focus: ["Industrial IoT", "Robotics", "Applied AI", "Enterprise Software"],
+  title: "Full-Stack, AI & Automation Engineer",
+  focus: ["Applied AI", "Enterprise Web Applications", "Industrial IoT"],
   location: "Karawang, Indonesia",
   greeting: "Hi, I'm",
 
   /** Large statement used in the introduction section. */
   headline: "I bridge industrial operations and enterprise software.",
   intro:
-    "Automation & Software Engineer working across industrial automation, Industrial IoT, robotics, applied AI, and enterprise software.",
+    "Full-stack, AI and automation engineer who builds AI-enabled systems around how operations actually run — from LLM-powered apps and computer vision to industrial IoT and enterprise software.",
   bio: [
     "I build systems that sit where the physical and the digital meet — telemetry networks that report water levels from the field, robots that map the space around them, and business platforms that turn day-to-day operations into clean software.",
     "My strongest skill is understanding how a business actually runs, then translating that process into software people can rely on. I work through practical engineering and business process analysis, from requirements to deployment.",
@@ -28,12 +28,14 @@ export const profile = {
   story: [
     "I studied Automation Engineering Technology at Institut Teknologi Sepuluh Nopember (ITS) in Surabaya, where I worked as a research student in the Electric Drive and Power Electronics System Laboratory and joined a Global Project Based Learning programme with Shibaura Institute of Technology in Japan.",
     "At Toyota Motor Manufacturing Indonesia's R&D team, I built autonomous mobile robot prototypes with ROS and SLAM, and deployed YOLO-based computer vision models on NVIDIA Jetson hardware.",
-    "I then joined PT Alkatec Mandiri Kencana as a Telemetry Engineer on the Rentang Irrigation Modernization Project, working as a subcontractor to the state-owned contractor PT Adhi Karya (Persero) Tbk and supporting Industrial IoT telemetry across a distributed irrigation network. Alongside full-time roles, I deliver production web applications for paying clients as an independent software engineer.",
+    "I then joined PT Alkatec Mandiri Kencana as a Telemetry Engineer on the Rentang Irrigation Modernization Project, working as a subcontractor to the state-owned contractor PT Adhi Karya (Persero) Tbk and supporting Industrial IoT telemetry across a distributed irrigation network from March 2025 to August 2026.",
+    "Since 2025 I have been a business partner at Maudy Network Komunikasi, an IT and telecommunications infrastructure company in Semarang, where I built Xtur, an AI CCTV analytics platform, and Aegis AI, a self-hosted LLM platform. Since October 2025 I also deliver production web applications for paying clients as an independent software engineer, and I build LLM products such as SmartMoney, a voice-first finance assistant powered by Google Gemini.",
   ],
 
   interests: [
     "Industrial IoT & remote monitoring",
     "Autonomous mobile robots",
+    "LLM-powered products",
     "Edge AI & computer vision",
     "Business process digitisation",
     "Enterprise web platforms",

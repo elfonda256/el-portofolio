@@ -2,39 +2,37 @@ import type { SkillGroup } from "./types";
 
 /** Short list shown in the About section. */
 export const coreSkills = [
-  "Business Process Analysis",
-  "Requirements Gathering",
   "Full-Stack Web Development",
+  "LLM Integration",
+  "Computer Vision (YOLO, TensorRT, Jetson)",
+  "Object Detection & Tracking",
   "System & Database Design",
   "Industrial IoT & Telemetry",
-  "Sensor Integration & Data Acquisition",
-  "ROS, SLAM & Autonomous Mobile Robots",
-  "Computer Vision (YOLO, TensorRT, Jetson)",
-];
+  "Business Process Analysis",
+  "Requirements Gathering",
+]
 
 /** Full technical skills, grouped. Source: CV. */
 export const skillGroups: SkillGroup[] = [
-  { name: "Programming", items: ["TypeScript", "JavaScript", "Python", "C/C++", "HTML", "CSS"] },
-  { name: "Frontend", items: ["React", "Next.js", "TypeScript", "Tailwind CSS"] },
+  { name: "Programming", items: ["TypeScript", "JavaScript", "Python", "C/C++", "SQL", "HTML", "CSS"] },
   {
-    name: "Backend & Database",
-    items: ["PostgreSQL", "Prisma ORM", "Supabase", "Next.js API Routes", "REST APIs", "WhatsApp API (Fonnte)"],
+    name: "AI & Machine Learning",
+    items: ["LLM APIs (Google Gemini)", "Ollama / local LLMs", "PyTorch", "TensorFlow", "YOLO / YOLOv8", "TensorRT", "DeepSORT", "DeepFace", "OCR (Tesseract, EasyOCR)", "Jetson Inference", "Google Colab"],
   },
-  { name: "Version Control", items: ["Git", "GitHub"] },
+  {
+    name: "Web & Backend",
+    items: ["Next.js", "React", "Tailwind CSS", "FastAPI", "REST APIs", "PostgreSQL", "Prisma ORM", "Supabase", "Redis", "WhatsApp API (Fonnte)"],
+  },
+  { name: "DevOps & Tools", items: ["Docker", "Vercel", "Coolify", "Git", "GitHub", "AI coding agents (Claude, Gemini)"] },
   {
     name: "Automation & Robotics",
     items: ["ROS", "SLAM", "LiDAR Integration", "NVIDIA Jetson Nano / Orin Nano", "Arduino", "PID Control"],
   },
   {
-    name: "AI & Computer Vision",
-    items: ["PyTorch", "TensorFlow", "YOLO", "NVIDIA Jetson Inference", "NVIDIA TensorRT", "Model Training", "Google Colab"],
-  },
-  {
     name: "Industrial IoT",
-    items: ["Telemetry", "Telecontrol", "Modbus", "MQTT", "GSM", "Remote Monitoring", "Sensor Integration", "Data Loggers", "Communication Gateways", "Data Acquisition"],
+    items: ["Telemetry", "Telecontrol", "Modbus", "MQTT", "GSM", "Data Loggers", "Communication Gateways", "Data Acquisition", "Remote Monitoring"],
   },
-  /** Stated by Elfano (not on the CV PDF yet). */
-  { name: "English", items: ["TOEIC 750 (2024)", "TOEFL 501 (2021)"] },
+  { name: "Languages", items: ["Indonesian (native)", "English — TOEIC 750 (2024), TOEFL 501 (2021)"] },
   {
     name: "Engineering",
     items: ["Business Process Analysis", "Requirements Gathering", "System Architecture", "Database Design", "UI/UX Design", "AI-Assisted Development"],
