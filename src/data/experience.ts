@@ -7,7 +7,7 @@ export const experience: TimelineItem[] = [
     title: "Independent Software Engineer",
     organization: "Commercial Client Projects",
     context: "Remote · Alongside full-time roles",
-    period: "Ongoing",
+    period: "Oct 2025 – Present",
     description:
       "Deliver production web applications for paying clients, owning the full lifecycle from requirements gathering to deployment and post-launch improvement.",
     points: [
@@ -37,7 +37,7 @@ export const experience: TimelineItem[] = [
     organization: "PT Toyota Motor Manufacturing Indonesia",
     context: "Automation, Robotics & Applied AI",
     location: "Karawang, Indonesia",
-    period: "May 2023 – May 2024",
+    period: "May 2023 – Apr 2024",
     points: [
       "Built autonomous mobile robot (AMR) prototypes using ROS, implementing SLAM for mapping and autonomous navigation.",
       "Trained YOLO object detection models with PyTorch and TensorFlow; optimized with TensorRT on Jetson Nano / Orin Nano (≈47–60 FPS).",
