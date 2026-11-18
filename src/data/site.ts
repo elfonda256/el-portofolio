@@ -28,7 +28,7 @@ export const profile = {
   story: [
     "I studied Automation Engineering Technology at Institut Teknologi Sepuluh Nopember (ITS) in Surabaya, where I worked as a research student in the Electric Drive and Power Electronics System Laboratory and joined a Global Project Based Learning programme with Shibaura Institute of Technology in Japan.",
     "At Toyota Motor Manufacturing Indonesia's R&D team, I built autonomous mobile robot prototypes with ROS and SLAM, and deployed YOLO-based computer vision models on NVIDIA Jetson hardware.",
-    "I then joined PT Alkatec Mandiri Kencana as a Telemetry Engineer on the Rentang Irrigation Modernization Project, supporting Industrial IoT telemetry across a distributed irrigation network. Alongside full-time roles, I deliver production web applications for paying clients as an independent software engineer.",
+    "I then joined PT Alkatec Mandiri Kencana as a Telemetry Engineer on the Rentang Irrigation Modernization Project, working as a subcontractor to the state-owned contractor PT Adhi Karya (Persero) Tbk and supporting Industrial IoT telemetry across a distributed irrigation network. Alongside full-time roles, I deliver production web applications for paying clients as an independent software engineer.",
   ],
 
   interests: [

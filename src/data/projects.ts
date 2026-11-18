@@ -19,11 +19,11 @@ export const projects: Project[] = [
     summary:
       "Industrial IoT telemetry and remote monitoring for the Rentang Irrigation Modernization Project — 52 telemetry and 13 telecontrol stations.",
     overview: [
-      "The Rentang Irrigation Modernization Project brings real-time data to an irrigation network in Majalengka, West Java. As Telemetry Engineer at PT Alkatec Mandiri Kencana, I worked on the systems that collect field measurements and deliver them to the people managing water distribution.",
+      "The Rentang Irrigation Modernization Project brings real-time data to an irrigation network in Majalengka, West Java. As Telemetry Engineer at PT Alkatec Mandiri Kencana, a subcontractor to the state-owned contractor PT Adhi Karya (Persero) Tbk, I worked on the systems that collect field measurements and deliver them to the people managing water distribution.",
       "The work spans the full data path: field sensors, data loggers, communication gateways and telemetry infrastructure, connected over Modbus, MQTT and GSM so that water flow, water levels, climatology and environmental parameters can be monitored remotely.",
     ],
     role: "Telemetry Engineer",
-    context: "PT Alkatec Mandiri Kencana · Majalengka, Indonesia",
+    context: "PT Alkatec Mandiri Kencana (subcontractor to PT Adhi Karya, BUMN) · Majalengka, Indonesia",
     highlights: [
       "Designed and implemented Industrial IoT telemetry systems using Modbus, MQTT and GSM communication.",
       "Supported deployment and operation of 52 telemetry stations and 13 telecontrol stations.",

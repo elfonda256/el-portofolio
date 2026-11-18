@@ -19,10 +19,11 @@ export const experience: TimelineItem[] = [
   {
     title: "Telemetry Engineer",
     organization: "PT Alkatec Mandiri Kencana",
-    context: "Rentang Irrigation Modernization Project",
+    context: "Subcontractor to PT Adhi Karya (Persero) Tbk (BUMN) · Rentang Irrigation Modernization Project",
     location: "Majalengka, Indonesia",
     period: "Mar 2025 – Aug 2026",
     points: [
+      "Worked within a state-owned enterprise (BUMN) project structure as a subcontractor to PT Adhi Karya (Persero) Tbk, the contractor for the Rentang Irrigation Modernization Project.",
       "Designed and implemented Industrial IoT telemetry systems using Modbus, MQTT and GSM communication.",
       "Supported deployment and operation of 52 telemetry stations and 13 telecontrol stations.",
       "Delivered an end-to-end data acquisition and remote monitoring system integrating sensors, data loggers, gateways and telemetry infrastructure.",
