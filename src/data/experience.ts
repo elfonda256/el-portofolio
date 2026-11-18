@@ -58,9 +58,11 @@ export const education: TimelineItem[] = [
     period: "Aug 2020 – Sep 2024",
     description: "GPA 3.41 / 4.00",
     points: [
-      "Global Project Based Learning (GPbL) with Shibaura Institute of Technology, Japan (2024).",
+      "Global Project Based Learning (GPbL) with Shibaura Institute of Technology, Japan (2024): presented an energy monitoring project with a joint ITS and SIT team.",
+      "Liaison Officer, Kontes Robot Indonesia (KRI) 2022 national round, hosted by ITS.",
       "Research Student, Electric Drive and Power Electronics System Laboratory (2021 – 2023).",
       "Finalist, Student Creativity Program (PKM): Community Service (2023) and Creativity Initiative (2021).",
     ],
+    photos: [ph.gpblSit, ph.kri2022, ph.itsGraduationDept, ph.itsGraduation130],
   },
 ];

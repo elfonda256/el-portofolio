@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { sectionIndex } from "@/data/site";
 import { services } from "@/data/services";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -31,7 +32,17 @@ export function Services() {
               <article className="group flex h-full flex-col overflow-hidden glass rounded-[var(--radius-card)] transition-all duration-700 ease-[var(--ease-out-expo)] hover:-translate-y-1 hover:border-signal/40 hover:shadow-[0_30px_80px_-40px_rgb(255_59_48/0.45)]">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <div className="absolute inset-0 transition-transform duration-[1.2s] ease-[var(--ease-out-expo)] group-hover:scale-[1.06]">
-                    <ProjectCover cover={s.cover} uid={`svc-${i}`} label={`Illustration for ${s.title}`} />
+                    {s.image ? (
+                      <Image
+                        src={s.image}
+                        alt={s.imageAlt ?? s.title}
+                        fill
+                        sizes="(min-width:768px) 33vw, 100vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <ProjectCover cover={s.cover} uid={`svc-${i}`} label={`Illustration for ${s.title}`} />
+                    )}
                   </div>
                   <span className="absolute left-4 top-4 grid size-9 place-items-center rounded-full border border-white/10 bg-canvas/80 font-mono text-xs backdrop-blur">
                     0{i + 1}

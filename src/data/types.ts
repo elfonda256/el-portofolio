@@ -94,7 +94,11 @@ export interface Service {
   title: string;
   description: string;
   deliverables: string[];
+  /** Fallback illustration when there is no `image`. */
   cover: CoverArt;
+  /** Optional artwork in /public, e.g. "/images/services/service-iot.jpg". Replaces the illustration. */
+  image?: string;
+  imageAlt?: string;
   link?: ProjectLink;
 }
 

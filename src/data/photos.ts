@@ -192,4 +192,37 @@ export const library = {
     width: 1280,
     height: 765,
   },
+  // ── ITS: education & campus activities ───────────────────────
+  gpblSit: {
+    src: "/images/education/gpbl-sit-energy-monitoring.jpg",
+    alt: "Elfano with his GPbL team of ITS and Japanese students and a professor from Shibaura Institute of Technology, after their presentation",
+    caption: "GPbL with Shibaura Institute of Technology — after our energy monitoring presentation at ITS",
+    width: 1024,
+    height: 768,
+    position: "50% 45%",
+  },
+  itsGraduation130: {
+    src: "/images/education/its-graduation-130.jpg",
+    alt: "Graduates in gowns waving together in the ITS graduation hall at the 130th commencement",
+    caption: "ITS 130th graduation ceremony (Sep 2024)",
+    width: 1600,
+    height: 1200,
+    position: "50% 62%",
+  },
+  itsGraduationDept: {
+    src: "/images/education/its-graduation-automation-dept.jpg",
+    alt: "Elfano and a fellow graduate in gowns and medals beneath the Electrical Automation Engineering department banner",
+    caption: "Graduation day at the Department of Electrical Automation Engineering (ITS)",
+    width: 768,
+    height: 1024,
+    position: "50% 75%",
+  },
+  kri2022: {
+    src: "/images/education/kri-2022-liaison-officer.jpg",
+    alt: "Elfano with fellow KRI 2022 committee members in purple shirts and ITS Rector Prof. Mochamad Ashari in front of the event stage",
+    caption: "Liaison officer at Kontes Robot Indonesia 2022, hosted by ITS — with Rector Prof. Mochamad Ashari",
+    width: 899,
+    height: 1600,
+    position: "50% 72%",
+  },
 } satisfies Record<string, Photo>;
