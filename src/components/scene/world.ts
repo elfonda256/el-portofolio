@@ -244,7 +244,7 @@ function starGeometry(THREE: Three, outer: number, inner: number) {
 
 /* ── the ESS 26 emblem ───────────────────────────── */
 const EMBLEM_SRC = "/images/brand/ess26-emblem.webp";
-const EMBLEM_ASPECT = 720 / 913; // width / height of the image
+const EMBLEM_ASPECT = 720 / 769; // width / height of the image
 
 const emblemVert = /* glsl */ `
   varying vec2 vUv;

@@ -359,9 +359,19 @@ export function TrackScene({ dim = false, routeKey = "" }: { dim?: boolean; rout
       // start gantry
       const gp = curve.getPointAt(GANTRY_U);
       const gt = curve.getTangentAt(GANTRY_U);
-      const gantry = new THREE.Mesh(track(new THREE.BoxGeometry(0.9, 1.4, 22)), dark);
-      gantry.position.set(gp.x, 7.2, gp.z);
+      // start/finish gantry: a beam on two legs
+      const gantry = new THREE.Group();
+      gantry.position.set(gp.x, 0, gp.z);
       gantry.rotation.y = Math.atan2(-gt.z, gt.x);
+      const beam = new THREE.Mesh(track(new THREE.BoxGeometry(0.9, 1.4, 22)), dark);
+      beam.position.y = 7.2;
+      const legGeo = track(new THREE.BoxGeometry(0.7, 7.9, 0.7));
+      gantry.add(beam);
+      for (const s of [-1, 1]) {
+        const leg = new THREE.Mesh(legGeo, dark);
+        leg.position.set(0, 3.95, s * 11.35);
+        gantry.add(leg);
+      }
       scene.add(gantry);
 
       // lights (direct + reflected)
@@ -638,11 +648,11 @@ export function TrackScene({ dim = false, routeKey = "" }: { dim?: boolean; rout
             break;
           }
           default: {
-            // finish: the chequered flag on the gantry, car crossing the line
-            const u = 0.988 + t * 0.022;
-            at(u, camTarget).y = 1.4;
-            placeCarOnTrack(u + 12 / L + t * 0.008);
-            at(GANTRY_U, lookTarget).y = 5.8;
+            // finish: chase the car across the line under the flag, then let it brake to a stop
+            const u = 0.975 + t * 0.03 + finishRoll;
+            placeCarOnTrack(u);
+            at(u - 10 / L, camTarget).y = 1.5;
+            at(u + 30 / L, lookTarget).y = 1.7;
           }
         }
       };
@@ -665,6 +675,7 @@ export function TrackScene({ dim = false, routeKey = "" }: { dim?: boolean; rout
       let speed = 0;
       let dimT = 0;
       let drive = 0; // extra distance driven while sitting on the track chapter
+      let finishRoll = 0; // distance the car coasts on the finish chapter (eases to a stop)
       pose(shown, dimRef.current ? 0.5 : first.t, 0);
       camPos.copy(camTarget);
       look.copy(lookTarget);
@@ -720,6 +731,9 @@ export function TrackScene({ dim = false, routeKey = "" }: { dim?: boolean; rout
           if (jump >= 1) jump = -1;
         }
         if (shown === 4 && !reduce) drive = Math.min(drive + dt * 0.0035, 0.06);
+        // arrives at racing speed (~130 km/h) and brakes past the line; replays on every visit
+        if (shown === 5 && !reduce) finishRoll += (0.07 - finishRoll) * (1 - Math.exp(-dt * 0.45));
+        else if (shown !== 5) finishRoll = 0;
 
         pose(shown, read.t, time);
         if (jump >= 0 && !swapped) {
