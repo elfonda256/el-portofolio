@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ClickOrigin } from "@/components/scene/ClickOrigin";
+import { SceneHost } from "@/components/scene/SceneHost";
 import { profile, site, socials, contact } from "@/data/site";
 import "./globals.css";
 
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <ClickOrigin />
+        <SceneHost />
         <Navbar />
         <main id="main">{children}</main>
         <Footer />

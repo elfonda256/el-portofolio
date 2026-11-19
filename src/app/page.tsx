@@ -8,15 +8,13 @@ import { Journey } from "@/components/sections/Journey";
 import { Services } from "@/components/sections/Services";
 import { Contact } from "@/components/sections/Contact";
 import { features } from "@/data/site";
-import { TrackScene } from "@/components/scene/TrackScene";
 import { IntroLoader } from "@/components/scene/IntroLoader";
 
 export default function HomePage() {
   return (
     <>
       <IntroLoader />
-      <TrackScene />
-            <Hero />
+      <Hero />
       <Intro />
       <FieldBand />
       {features.showLatestContent && <LatestContent />}
@@ -25,6 +23,6 @@ export default function HomePage() {
       <Journey />
       <Services />
       <Contact />
-          </>
+    </>
   );
 }

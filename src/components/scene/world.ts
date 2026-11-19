@@ -1,6 +1,6 @@
 /**
  * "Night Lap" set pieces: an original open-wheel race car, the pit lane, a
- * showcase garage, the pit-wall telemetry stand and the chequered flag.
+ * trophy room, the pit-wall telemetry stand and the chequered flag.
  * Everything here is invented for this site — no real team, car or brand.
  */
 import type * as THREE_NS from "three";
@@ -214,24 +214,97 @@ export function buildCar(THREE: Three, env: THREE_NS.Texture): Car {
   };
 }
 
-/* ── the showcase garage (built away from the circuit) ── */
-export function buildGarage(THREE: Three, origin: V3, lite: boolean) {
+/* ── the trophy room (built away from the circuit) ── */
+const metal = (THREE: Three, env: THREE_NS.Texture, color: string, roughness: number) =>
+  new THREE.MeshPhysicalMaterial({ color, metalness: 1, roughness, clearcoat: 0.6, clearcoatRoughness: 0.15, envMap: env, envMapIntensity: 1.6 });
+
+/** Body of a classic cup, ~1.2 units tall, standing on y = 0. */
+function cupGeometry(THREE: Three) {
+  const profile: [number, number][] = [
+    [0, 0], [0.42, 0], [0.42, 0.07], [0.34, 0.11], [0.3, 0.17], [0.12, 0.21], [0.07, 0.27],
+    [0.06, 0.5], [0.1, 0.55], [0.07, 0.6], [0.13, 0.65], [0.3, 0.73], [0.42, 0.87], [0.48, 1.02],
+    [0.5, 1.18], [0.46, 1.18], [0.4, 0.96], [0.22, 0.8], [0, 0.76],
+  ];
+  return new THREE.LatheGeometry(profile.map(([x, y]) => new THREE.Vector2(x, y)), 48);
+}
+
+function starGeometry(THREE: Three, outer: number, inner: number) {
+  const s = new THREE.Shape();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 ? inner : outer;
+    const a = Math.PI / 2 + (i * Math.PI) / 5;
+    if (i === 0) s.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    else s.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+  }
+  s.closePath();
+  const g = new THREE.ExtrudeGeometry(s, { depth: 0.035, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 });
+  g.translate(0, 0, -0.0175);
+  return g;
+}
+
+/* ── the ESS 26 emblem ───────────────────────────── */
+const EMBLEM_SRC = "/images/brand/ess26-emblem.webp";
+const EMBLEM_ASPECT = 720 / 913; // width / height of the image
+
+const emblemVert = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+/** Gold that catches a slow sweep of light now and then; the red parts (eyes, "26") glow and breathe. */
+const emblemFrag = /* glsl */ `
+  uniform sampler2D uMap;
+  uniform float uTime;
+  uniform float uGain;
+  varying vec2 vUv;
+  void main() {
+    vec4 tex = texture2D(uMap, vUv);
+    float red = smoothstep(0.25, 0.55, tex.r - tex.g);
+    vec3 col = tex.rgb * uGain;
+    // a diagonal glint crosses the gold once every 7 s
+    float sweep = fract(uTime / 7.0) * 3.2 - 1.1;
+    float glint = smoothstep(0.1, 0.0, abs(vUv.x + vUv.y * 0.55 - sweep)) * (1.0 - red);
+    col += vec3(1.0, 0.9, 0.7) * glint * 0.85;
+    col += vec3(1.0, 0.12, 0.06) * red * (0.35 + 0.35 * (0.5 + 0.5 * sin(uTime * 1.4)));
+    gl_FragColor = vec4(col, tex.a);
+  }
+`;
+
+/** Soft radial light used as a halo behind the emblem. */
+function haloTexture(THREE: Three) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const g = c.getContext("2d")!;
+  const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grad.addColorStop(0, "rgba(255,170,90,0.55)");
+  grad.addColorStop(0.35, "rgba(255,59,48,0.22)");
+  grad.addColorStop(1, "rgba(255,59,48,0)");
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 256, 256);
+  return new THREE.CanvasTexture(c);
+}
+
+export function buildTrophyRoom(THREE: Three, origin: V3, env: THREE_NS.Texture, lite: boolean) {
   const group = new THREE.Group();
   group.position.copy(origin);
   const disposables: { dispose(): void }[] = [];
   const keep = <T extends { dispose(): void }>(x: T) => (disposables.push(x), x);
+  const add = (geo: THREE_NS.BufferGeometry, mat: THREE_NS.Material, x: number, y: number, z: number) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    group.add(m);
+    return m;
+  };
 
   const W = 16, D = 14, H = 5.2;
-  const wall = keep(new THREE.MeshStandardMaterial({ color: "#1c1f25", roughness: 0.9, metalness: 0.05 }));
-  const room = new THREE.Mesh(keep(new THREE.BoxGeometry(W, H, D)), wall);
-  room.material.side = THREE.BackSide;
-  room.position.y = H / 2;
-  group.add(room);
+  const wall = keep(new THREE.MeshStandardMaterial({ color: "#16181d", roughness: 0.92, metalness: 0.05, side: THREE.BackSide }));
+  add(keep(new THREE.BoxGeometry(W, H, D)), wall, 0, H / 2, 0);
 
   // glossy floor: a real reflection under a tinted epoxy layer
   let reflector: THREE_NS.Object3D | null = null;
-  const setupFloor = async () => {
-    const { Reflector } = await import("three/addons/objects/Reflector.js");
+  void import("three/addons/objects/Reflector.js").then(({ Reflector }) => {
     const r = new Reflector(new THREE.PlaneGeometry(W, D), {
       textureWidth: lite ? 512 : 1024,
       textureHeight: lite ? 512 : 1024,
@@ -241,70 +314,182 @@ export function buildGarage(THREE: Three, origin: V3, lite: boolean) {
     r.position.y = 0.001;
     group.add(r);
     reflector = r;
-  };
-  void setupFloor();
-  const epoxy = new THREE.Mesh(
+  });
+  const epoxy = add(
     keep(new THREE.PlaneGeometry(W, D)),
-    keep(new THREE.MeshBasicMaterial({ color: "#14171c", transparent: true, opacity: 0.62 })),
+    keep(new THREE.MeshBasicMaterial({ color: "#14161b", transparent: true, opacity: 0.66 })),
+    0, 0.01, 0,
   );
   epoxy.rotation.x = -Math.PI / 2;
-  epoxy.position.y = 0.01;
-  group.add(epoxy);
-  // floor markings
-  const line = keep(new THREE.MeshBasicMaterial({ color: "#d8dbe0" }));
-  for (const s of [-1, 1]) {
-    const m = new THREE.Mesh(keep(new THREE.PlaneGeometry(0.08, 9)), line);
-    m.rotation.x = -Math.PI / 2;
-    m.position.set(s * 2.4, 0.02, 0);
-    group.add(m);
-  }
 
-  // ceiling light strips
-  const glow = keep(new THREE.MeshBasicMaterial({ color: "#f2f5ff" }));
-  for (const x of [-3, 0, 3]) {
-    const s = new THREE.Mesh(keep(new THREE.BoxGeometry(0.18, 0.04, 8)), glow);
-    s.position.set(x, H - 0.05, 0);
-    group.add(s);
-  }
-  // red accent light bars on the back wall
+  const gold = keep(metal(THREE, env, "#e0b354", 0.2));
+  const silver = keep(metal(THREE, env, "#c9ced6", 0.18));
+  const bronze = keep(metal(THREE, env, "#b9774a", 0.28));
+  const finishes = [gold, silver, bronze];
+  const stone = keep(new THREE.MeshPhysicalMaterial({ color: "#0d0e11", roughness: 0.3, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.1, envMap: env }));
   const redGlow = keep(new THREE.MeshBasicMaterial({ color: "#ff3b30" }));
-  for (const y of [1.2, 3.6]) {
-    const b = new THREE.Mesh(keep(new THREE.BoxGeometry(W - 2, 0.05, 0.05)), redGlow);
-    b.position.set(0, y, -D / 2 + 0.06);
-    group.add(b);
-  }
-  // tool cabinets
-  const cab = keep(new THREE.MeshStandardMaterial({ color: "#1b1e24", roughness: 0.5, metalness: 0.5 }));
+  const warmGlow = keep(new THREE.MeshBasicMaterial({ color: "#ffe2b8" }));
+
+  // centre plinth with a red light ring
+  add(keep(new THREE.CylinderGeometry(0.95, 1.05, 1, 48)), stone, 0, 0.5, 0);
+  const ring = add(keep(new THREE.TorusGeometry(0.97, 0.015, 8, 64)), redGlow, 0, 1.0, 0);
+  ring.rotation.x = Math.PI / 2;
+  add(keep(new THREE.CylinderGeometry(1.08, 1.1, 0.06, 48)), redGlow, 0, 0.03, 0);
+
+  // the championship cup
+  const cup = keep(cupGeometry(THREE));
+  const handle = keep(new THREE.TorusGeometry(0.2, 0.034, 10, 28, Math.PI));
+  const champion = new THREE.Group();
+  champion.position.y = 1.0;
+  champion.add(new THREE.Mesh(cup, gold));
   for (const s of [-1, 1]) {
-    for (let i = 0; i < 4; i++) {
-      const c = new THREE.Mesh(keep(new THREE.BoxGeometry(0.7, 1.05, 1.4)), cab);
-      c.position.set(s * (W / 2 - 0.45), 0.53, -4.5 + i * 1.6);
-      group.add(c);
-      const handle = new THREE.Mesh(keep(new THREE.BoxGeometry(0.02, 0.04, 1.1)), redGlow);
-      handle.position.set(s * (W / 2 - 0.82), 0.9, -4.5 + i * 1.6);
-      group.add(handle);
+    const h = new THREE.Mesh(handle, gold);
+    h.rotation.z = -s * Math.PI / 2;
+    h.position.set(s * 0.47, 0.96, 0);
+    champion.add(h);
+  }
+  group.add(champion);
+
+  // smaller awards on lit shelves around the walls
+  const star = keep(starGeometry(THREE, 0.16, 0.07));
+  const stem = keep(new THREE.CylinderGeometry(0.015, 0.015, 0.22, 8));
+  const base = keep(new THREE.BoxGeometry(0.18, 0.08, 0.12));
+  const disc = keep(new THREE.CylinderGeometry(0.17, 0.17, 0.025, 40));
+  const gem = keep(new THREE.OctahedronGeometry(0.11, 0));
+  const shelf = keep(new THREE.BoxGeometry(1, 0.05, 1));
+  const strip = keep(new THREE.BoxGeometry(1, 0.012, 1));
+
+  const award = (kind: number, mat: THREE_NS.Material, x: number, y: number, z: number, faceY: number) => {
+    const a = new THREE.Group();
+    a.position.set(x, y, z);
+    a.rotation.y = faceY;
+    const piece = (geo: THREE_NS.BufferGeometry, m: THREE_NS.Material, px: number, py: number, rz = 0) => {
+      const mesh = new THREE.Mesh(geo, m);
+      mesh.position.set(px, py, 0);
+      mesh.rotation.z = rz;
+      a.add(mesh);
+      return mesh;
+    };
+    piece(base, stone, 0, 0.04);
+    if (kind === 0) {
+      piece(cup, mat, 0, 0.08).scale.setScalar(0.32);
+    } else if (kind === 1) {
+      piece(stem, mat, 0, 0.19);
+      piece(star, mat, 0, 0.42);
+    } else if (kind === 2) {
+      piece(disc, mat, 0, 0.27, Math.PI / 2).rotation.y = Math.PI / 2;
+    } else {
+      piece(stem, mat, 0, 0.19);
+      piece(gem, mat, 0, 0.38).scale.set(0.8, 1.3, 0.8);
+    }
+    group.add(a);
+  };
+
+  const rows = lite ? [1.35, 2.45] : [1.25, 2.25, 3.25];
+  const depth = 0.5;
+  const inset = depth / 2 + 0.02;
+  const sideLen = D - 4.5;
+  const sideZ = -0.8; // side shelves stop short of the open front
+  // each wall: centre, length, which axis it runs along, and which way the awards face
+  const gap = 3.6; // the centre of the back wall is kept for the emblem
+  const backLen = (W - 3 - gap) / 2;
+  const walls = [
+    { cx: -(gap + backLen) / 2, cz: -D / 2 + inset, len: backLen, alongX: true, face: 0 },
+    { cx: (gap + backLen) / 2, cz: -D / 2 + inset, len: backLen, alongX: true, face: 0 },
+    { cx: -W / 2 + inset, cz: sideZ, len: sideLen, alongX: false, face: Math.PI / 2 },
+    { cx: W / 2 - inset, cz: sideZ, len: sideLen, alongX: false, face: -Math.PI / 2 },
+  ];
+  let n = 0;
+  for (const w of walls) {
+    const out = w.alongX ? 1 : -Math.sign(w.cx); // towards the room centre
+    for (const y of rows) {
+      const board = add(shelf, stone, w.cx, y, w.cz);
+      const led = add(strip, warmGlow, w.cx, y - 0.032, w.cz);
+      if (w.alongX) {
+        board.scale.set(w.len, 1, depth);
+        led.scale.set(w.len - 0.1, 1, 0.04);
+        led.position.z += out * (depth / 2 - 0.05);
+      } else {
+        board.scale.set(depth, 1, w.len);
+        led.scale.set(0.04, 1, w.len - 0.1);
+        led.position.x += out * (depth / 2 - 0.05);
+      }
+      const count = Math.floor(w.len / 1.25);
+      for (let i = 0; i < count; i++) {
+        const s = -w.len / 2 + (i + 0.5) * (w.len / count);
+        const x = w.alongX ? w.cx + s : w.cx;
+        const z = w.alongX ? w.cz : w.cz + s;
+        award(n % 4, finishes[(n * 7 + 3) % 3], x, y + 0.025, z, w.face);
+        n++;
+      }
     }
   }
 
-  // lights for the car
-  const key = new THREE.SpotLight("#f4f6ff", 420, 20, 0.75, 0.55, 1.4);
-  key.position.set(0, H - 0.3, 1.5);
-  key.target.position.set(0, 0, 0);
+  // the ESS 26 emblem: a large lit crest on the back wall, an engraving on the
+  // plinth and a faint inlay in the floor in front of it
+  const emblemTex = keep(new THREE.TextureLoader().load(EMBLEM_SRC));
+  emblemTex.anisotropy = 8;
+  const emblemU = { uMap: { value: emblemTex }, uTime: { value: 0 }, uGain: { value: 1.12 } };
+  const crestH = 2.4;
+  const crestY = 3.5; // high enough to clear the cup from the camera's path
+  const crest = add(
+    keep(new THREE.PlaneGeometry(crestH * EMBLEM_ASPECT, crestH)),
+    keep(new THREE.ShaderMaterial({ uniforms: emblemU, vertexShader: emblemVert, fragmentShader: emblemFrag, transparent: true, depthWrite: false })),
+    0, crestY, -D / 2 + 0.09,
+  );
+  const crestGlow = add(
+    keep(new THREE.PlaneGeometry(crestH * 1.9, crestH * 1.6)),
+    keep(new THREE.MeshBasicMaterial({ map: keep(haloTexture(THREE)), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })),
+    0, crestY, -D / 2 + 0.06,
+  );
+  crest.renderOrder = 2;
+  crestGlow.renderOrder = 1;
+
+  // engraving: a slice of a cylinder hugging the tapered plinth, facing the room
+  const bandH = 0.62, bandY = 0.5;
+  const rAt = (y: number) => 0.95 + 0.1 * (1 - y) + 0.004; // plinth radius at height y, plus a hair
+  const arc = (bandH * EMBLEM_ASPECT) / rAt(bandY);
+  const engraving = add(
+    keep(new THREE.CylinderGeometry(rAt(bandY + bandH / 2), rAt(bandY - bandH / 2), bandH, 24, 1, true, -arc / 2, arc)),
+    keep(new THREE.MeshStandardMaterial({ map: emblemTex, emissiveMap: emblemTex, emissive: "#ffffff", emissiveIntensity: 0.45, metalness: 0.8, roughness: 0.3, envMap: env, transparent: true })),
+    0, bandY, 0,
+  );
+  engraving.renderOrder = 2;
+
+  const inlay = add(
+    keep(new THREE.PlaneGeometry(2.4 * EMBLEM_ASPECT, 2.4)),
+    keep(new THREE.MeshBasicMaterial({ map: emblemTex, transparent: true, opacity: 0.16, depthWrite: false })),
+    0, 0.015, 2.9,
+  );
+  inlay.rotation.x = -Math.PI / 2;
+
+  // red accent lines near the floor and ceiling of the back wall
+  for (const y of [0.35, H - 0.4]) add(keep(new THREE.BoxGeometry(W - 2, 0.04, 0.04)), redGlow, 0, y, -D / 2 + 0.05);
+
+  // ceiling: a halo above the centrepiece
+  const halo = add(keep(new THREE.TorusGeometry(1.4, 0.03, 8, 64)), warmGlow, 0, H - 0.06, 0);
+  halo.rotation.x = Math.PI / 2;
+
+  // lighting: a hard key on the cup, warm shelf wash, red rim, cool fill
+  const key = new THREE.SpotLight("#fff1dc", 520, 14, 0.42, 0.5, 1.4);
+  key.position.set(0, H - 0.2, 0.6);
+  key.target.position.set(0, 1.4, 0);
   group.add(key, key.target);
-  const rim = new THREE.PointLight("#ff4a3a", 60, 14, 1.4);
-  rim.position.set(0, 1.2, -5);
-  group.add(rim);
-  const fill = new THREE.PointLight("#9fb4ff", 70, 16, 1.4);
-  fill.position.set(4, 2.4, 4);
-  group.add(fill);
-  group.add(new THREE.AmbientLight("#ffffff", 0.25));
-  const front = new THREE.PointLight("#ffffff", 50, 14, 1.4);
-  front.position.set(-5, 2.2, 4);
-  group.add(front);
+  const rim = new THREE.PointLight("#ff4a3a", 45, 12, 1.5);
+  rim.position.set(0, 1.6, -3.2);
+  const fill = new THREE.PointLight("#9fb4ff", 40, 14, 1.4);
+  fill.position.set(4.5, 2.6, 4.5);
+  const wash = new THREE.PointLight("#ffd6a0", 55, 12, 1.4);
+  wash.position.set(0, 3.2, -4.5);
+  group.add(rim, fill, wash, new THREE.AmbientLight("#ffffff", 0.22));
 
   return {
     group,
-    carSpot: new THREE.Vector3(origin.x, 0, origin.z),
+    /** Turns the centrepiece and drives the emblem's glint and glow. */
+    update(time: number) {
+      champion.rotation.y = time * 0.18;
+      emblemU.uTime.value = time;
+    },
     dispose() {
       disposables.forEach((d) => d.dispose());
       (reflector as unknown as { dispose?: () => void } | null)?.dispose?.();
@@ -332,7 +517,7 @@ export function buildPitLane(THREE: Three) {
   const tex = keep(new THREE.CanvasTexture(c));
   tex.colorSpace = THREE.SRGBColorSpace;
   const door = keep(new THREE.MeshBasicMaterial({ map: tex }));
-  const doorRefl = keep(new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending }));
+  const doorRefl = keep(new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.16, depthWrite: false, blending: THREE.AdditiveBlending }));
   const doorGeo = keep(new THREE.PlaneGeometry(9, 4.6));
   const white = keep(new THREE.MeshBasicMaterial({ color: "#c9ccd2" }));
   const red = keep(new THREE.MeshBasicMaterial({ color: "#c2241c" }));

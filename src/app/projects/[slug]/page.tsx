@@ -8,7 +8,6 @@ import { ProjectMedia } from "@/components/ui/ProjectCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { Gallery } from "@/components/ui/Gallery";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "@/components/ui/Icons";
-import { TrackScene } from "@/components/scene/TrackScene";
 import { SharedMedia } from "@/components/scene/PageTransition";
 
 
@@ -57,7 +56,6 @@ export default async function ProjectPage({ params }: { params: Promise<Params> 
 
   return (
     <>
-    <TrackScene dim />
         <article className="pb-24 pt-24 md:pb-32 md:pt-28">
       <div className="container-x">
         <Reveal>

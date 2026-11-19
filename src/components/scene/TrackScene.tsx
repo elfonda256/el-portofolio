@@ -2,27 +2,38 @@
 
 import { useEffect, useRef, useState } from "react";
 import { buildCurve, buildLights, buildTrackGeometry, mulberry32 } from "./track";
-import { buildCar, buildFlag, buildGarage, buildNightEnv, buildPitLane, buildPitWall } from "./world";
+import { buildCar, buildFlag, buildNightEnv, buildPitLane, buildPitWall, buildTrophyRoom } from "./world";
 
 /**
- * "Night Lap" — a fixed full-screen 3D night circuit behind the page.
- * Sections pick their place with `data-scene="0..5"` (see PLACES below).
+ * "Night Lap" — a fixed full-screen 3D night circuit behind every page.
+ * Mounted once in the root layout (see SceneHost) so it keeps running across
+ * navigation. Home-page sections pick their place with `data-scene="0..5"`;
+ * every other page shows the scene dimmed, in the place the visitor came from.
  */
 
 /**
  * Each home-page chapter is its own place in the racing world. Crossing into
  * the next chapter plays a "jump": the camera lunges forward, the view
- * stretches, speed lines flash — and it lands in the next place.
- *   0 Grid · 1 Pit lane · 2 Garage · 3 Pit wall · 4 On track · 5 Finish
+ * stretches, speed lines flash — and it glides into the next place.
+ *   0 Grid · 1 Pit lane · 2 Trophy room · 3 Pit wall · 4 On track · 5 Finish
  */
-const PLACES = ["Grid", "Pit lane", "Garage", "Pit wall", "On track", "Finish"] as const;
+const PLACES = ["Grid", "Pit lane", "Trophy room", "Pit wall", "On track", "Finish"] as const;
+const TROPHY_ROOM = 2;
 const GANTRY_U = 0.03;
-const JUMP_TIME = 1.05; // seconds
-const GARAGE_AT: [number, number, number] = [0, 0, 420]; // built away from the circuit
+const JUMP_TIME = 1.1; // seconds
+const SWAP_AT = 0.42; // point in the jump where the place changes, behind the flash
+const FOV_KICK = 20; // extra degrees at the peak of a jump
+const CAMERA_DAMPING = 3.2; // higher = camera catches up faster
+const TROPHY_AT: [number, number, number] = [0, 0, 420]; // built away from the circuit
 const PITWALL_AT: [number, number, number] = [-40, 0, 10.6];
 
-// Survives client-side navigation, so a project page continues in the same place.
-let lastPlace: number | null = null;
+/** Tells the intro loader the circuit has rendered (also readable after the event fired). */
+function markReady() {
+  document.documentElement.dataset.sceneReady = "1";
+  window.dispatchEvent(new Event("fieldscene:ready"));
+}
+
+const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
 /* ── shaders ─────────────────────────────────── */
 const FOG = /* glsl */ `
@@ -256,7 +267,7 @@ function readSector(sections: { el: HTMLElement; scene: number }[]) {
   return { scene: s, t: Math.min(1, Math.max(0, (c - top) / Math.max(1, bottom - top))) };
 }
 
-export function TrackScene({ dim = false }: { dim?: boolean }) {
+export function TrackScene({ dim = false, routeKey = "" }: { dim?: boolean; routeKey?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const speedRef = useRef<HTMLSpanElement>(null);
   const gearRef = useRef<HTMLSpanElement>(null);
@@ -267,6 +278,14 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
   const veilFrontRef = useRef<HTMLDivElement>(null);
   const [sector, setSector] = useState(0);
   const [failed, setFailed] = useState(false);
+  const dimRef = useRef(dim);
+  const routeRef = useRef<() => void>(() => {});
+
+  // a route change re-reads the page's sections and eases the camera in
+  useEffect(() => {
+    dimRef.current = dim;
+    routeRef.current();
+  }, [dim, routeKey]);
 
   useEffect(() => {
     let disposed = false;
@@ -282,7 +301,7 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: "high-performance" });
       } catch {
         setFailed(true);
-        window.dispatchEvent(new Event("fieldscene:ready"));
+        markReady();
         return;
       }
 
@@ -504,10 +523,10 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       const pitLane = buildPitLane(THREE);
       scene.add(pitLane.group);
       disposables.push(pitLane);
-      const garageOrigin = new THREE.Vector3(...GARAGE_AT);
-      const garage = buildGarage(THREE, garageOrigin, lite);
-      scene.add(garage.group);
-      disposables.push(garage);
+      const roomOrigin = new THREE.Vector3(...TROPHY_AT);
+      const trophyRoom = buildTrophyRoom(THREE, roomOrigin, env, lite);
+      scene.add(trophyRoom.group);
+      disposables.push(trophyRoom);
       const pitWallAt = new THREE.Vector3(...PITWALL_AT);
       const pitWall = buildPitWall(THREE, pitWallAt);
       scene.add(pitWall.group);
@@ -593,15 +612,13 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
             lookTarget.set(x + 32, 1.2, 18.5);
             break;
           }
-          case 2: {
-            // garage showcase: orbit the parked car
-            const a = 0.75 + t * 1.9 + Math.sin(time * 0.25) * 0.05;
-            camTarget.set(garageOrigin.x + Math.cos(a) * 6.6, 1.55, garageOrigin.z + Math.sin(a) * 6.6);
-            car.group.position.copy(garageOrigin);
-            car.group.rotation.set(0, 0, 0);
+          case TROPHY_ROOM: {
+            // trophy room: a slow orbit around the championship cup, shelves of awards behind
+            const a = 0.8 + t * 1.6 + Math.sin(time * 0.2) * 0.04;
+            camTarget.set(roomOrigin.x + Math.cos(a) * 6.3, 1.9, roomOrigin.z + Math.sin(a) * 6.3);
+            lookTarget.copy(roomOrigin).add(tmp.set(0, 1.5, 0));
+            // the car stays outside (hidden while indoors)
             carFwd.set(1, 0, 0);
-            carPos.copy(garageOrigin);
-            lookTarget.copy(garageOrigin).add(tmp.set(0, 0.45, 0));
             break;
           }
           case 3: {
@@ -631,12 +648,14 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       };
 
       const first = sections.length ? readSector(sections) : { scene: 0, t: 0 };
-      // project pages keep the place the visitor came from
-      let shown = dim ? lastPlace ?? 4 : first.scene;
-      let jump = lastPlace !== null && !reduce ? 0 : -1; // arriving from another page starts with a jump
-      let jumpStart = performance.now();
+      // pages without chapters (projects) live in the trophy room
+      const placeFor = (sceneOfPage: number) => (dimRef.current ? TROPHY_ROOM : sceneOfPage);
+      let shown = placeFor(first.scene);
+      let jump = -1; // progress through a chapter jump, -1 when idle
+      let jumpStart = 0;
       let jumpTo = shown;
-      let swapped = jump < 0;
+      let swapped = true;
+      let fovBoost = 0; // decays to 0; widens the view briefly after a route change
       let time = 0;
       let last = performance.now();
       let raf = 0;
@@ -646,59 +665,79 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       let speed = 0;
       let dimT = 0;
       let drive = 0; // extra distance driven while sitting on the track chapter
-      pose(shown, dim ? 0.5 : first.t, 0);
+      pose(shown, dimRef.current ? 0.5 : first.t, 0);
       camPos.copy(camTarget);
       look.copy(lookTarget);
       carPrev.copy(car.group.position);
+
+      /** Start a jump — or, if one is already fading out, turn it around without a visible reset. */
+      const startJump = (now: number) => {
+        const resume = jump >= 0 && swapped ? 1 - Math.min(1, jump) : 0;
+        jump = resume;
+        jumpStart = now - resume * JUMP_TIME * 1000;
+        swapped = false;
+      };
+
+      routeRef.current = () => {
+        // new page: wait a frame for its DOM, then re-read its chapters
+        requestAnimationFrame(collect);
+        if (reduce || jump >= 0) return;
+        // pull the camera back a little and let it glide in
+        tmp.subVectors(camPos, look).normalize();
+        camPos.addScaledVector(tmp, 2.6);
+        fovBoost = 7;
+      };
 
       const frame = (now: number) => {
         raf = requestAnimationFrame(frame);
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
         if (!reduce) time += dt;
+        const dim = dimRef.current;
+        if (!dim && sections.length && !sections[0].el.isConnected) collect();
 
-        const read = dim ? { scene: shown, t: (dimT += dt * 0.01) % 1 } : sections.length ? readSector(sections) : { scene: 0, t: 0 };
-        if (!dim && read.scene !== jumpTo) {
-          jumpTo = read.scene;
-          if (reduce) shown = jumpTo;
-          else if (jump < 0 || swapped) {
-            jump = 0;
-            jumpStart = now;
-            swapped = false;
-          }
+        const read = dim ? { scene: TROPHY_ROOM, t: (dimT += dt * 0.01) % 1 } : sections.length ? readSector(sections) : { scene: shown, t: 0 };
+        const want = placeFor(read.scene);
+        if (want !== jumpTo) {
+          jumpTo = want;
+          if (reduce) shown = want;
+          else if (jump < 0 || swapped) startJump(now);
         }
         let kick = 0;
         if (jump >= 0) {
           jump = (now - jumpStart) / 1000 / JUMP_TIME;
-          if (!swapped && jump >= 0.42) {
+          if (!swapped && jump >= SWAP_AT) {
             swapped = true;
             shown = jumpTo;
             pose(shown, read.t, time);
-            camPos.copy(camTarget);
+            // land a few metres short of the new spot and glide in, carrying the forward motion
+            tmp.subVectors(lookTarget, camTarget).normalize();
+            camPos.copy(camTarget).addScaledVector(tmp, -7);
             look.copy(lookTarget);
             carPrev.copy(car.group.position);
           }
-          kick = Math.sin(Math.min(1, jump) * Math.PI);
+          kick = Math.sin(easeInOut(Math.min(1, jump)) * Math.PI);
           if (jump >= 1) jump = -1;
         }
-        lastPlace = shown;
         if (shown === 4 && !reduce) drive = Math.min(drive + dt * 0.0035, 0.06);
 
         pose(shown, read.t, time);
         if (jump >= 0 && !swapped) {
           // lunge forward along the view direction
           tmp.subVectors(look, camPos).normalize();
-          camPos.addScaledVector(tmp, dt * 40 * kick);
-          look.addScaledVector(tmp, dt * 40 * kick);
+          camPos.addScaledVector(tmp, dt * 34 * kick);
+          look.addScaledVector(tmp, dt * 34 * kick);
         } else {
-          const k = reduce ? 1 : Math.min(1, dt * 3);
+          // frame-rate independent easing towards the place's camera
+          const k = reduce ? 1 : 1 - Math.exp(-dt * CAMERA_DAMPING);
           camPos.lerp(camTarget, k);
           look.lerp(lookTarget, k);
         }
         camera.position.copy(camPos);
         camera.up.set(0, 1, 0);
         camera.lookAt(look);
-        const fov = baseFov + kick * 34;
+        fovBoost *= Math.exp(-dt * 2.4);
+        const fov = baseFov + kick * FOV_KICK + fovBoost;
         if (Math.abs(camera.fov - fov) > 0.01) {
           camera.fov = fov;
           camera.updateProjectionMatrix();
@@ -722,14 +761,17 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         dynCol.set([1.4 * flash, 0.2 * flash, 0.14 * flash], 15);
         tailGlow.position.copy(tmpT).addScaledVector(carFwd, -0.9);
         tailGlow.position.y = 0.15;
-        tailGlow.intensity = 1.2 * flash;
+        const indoors = shown === TROPHY_ROOM;
+        car.group.visible = !indoors;
+        trophyRoom.group.visible = indoors; // its floor reflection is a second render pass
+        tailGlow.intensity = indoors ? 0 : 1.2 * flash;
+        if (indoors) dynCol.fill(0, 15, 18);
         // gantry: five reds on the grid
         const lightsOn = shown === 0 && !dim ? 1 : 0;
         for (let i = 0; i < 5; i++) dynCol.set([red.r * lightsOn, red.g * lightsOn, red.b * lightsOn], i * 3);
         dynGeo.attributes.position.needsUpdate = true;
         dynGeo.attributes.aColor.needsUpdate = true;
 
-        const indoors = shown === 2;
         rain.visible = !indoors;
         spray.visible = !indoors;
         const sp = Math.min(1, speed / 85);
@@ -742,6 +784,7 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         (sky.material as import("three").ShaderMaterial).uniforms.uTime.value = time;
         flag.group.visible = shown === 5;
         if (shown === 5) flag.update(time);
+        if (indoors) trophyRoom.update(time);
         if (shown === 3 && Math.floor(time * 10) !== Math.floor((time - dt) * 10)) pitWall.draw(time);
 
         renderer.render(scene, camera);
@@ -764,12 +807,12 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
           }
         }
         if (veilRef.current) {
-          const v = jump >= 0 ? Math.pow(kick, 2.2) : 0;
+          const v = jump >= 0 ? Math.pow(kick, 2.4) * 0.85 : 0;
           veilRef.current.style.opacity = v.toFixed(3);
           veilRef.current.style.transform = `scale(${(1 + kick * 0.25).toFixed(3)})`;
         }
         if (veilFrontRef.current) {
-          const v = jump >= 0 ? Math.pow(kick, 3) * 0.32 : 0;
+          const v = jump >= 0 ? Math.pow(kick, 3) * 0.2 : 0;
           veilFrontRef.current.style.opacity = v.toFixed(3);
           veilFrontRef.current.style.transform = `scale(${(1.1 + kick * 0.35).toFixed(3)})`;
         }
@@ -779,7 +822,7 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
         }
         if (!ready) {
           ready = true;
-          window.dispatchEvent(new Event("fieldscene:ready"));
+          markReady();
         }
       };
       raf = requestAnimationFrame(frame);
@@ -807,14 +850,14 @@ export function TrackScene({ dim = false }: { dim?: boolean }) {
       disposed = true;
       stop();
     };
-  }, [dim]);
+  }, []);
 
   return (
     <>
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className={`pointer-events-none fixed inset-0 -z-10 h-lvh w-full ${dim ? "opacity-45" : ""}`}
+        className={`pointer-events-none fixed inset-0 -z-10 h-lvh w-full transition-opacity duration-1000 ease-[var(--ease-out-expo)] ${dim ? "opacity-45" : "opacity-100"}`}
       />
       <div
         aria-hidden="true"

@@ -18,7 +18,7 @@ export function IntroLoader() {
     if (!el || getComputedStyle(el).display === "none") return;
 
     document.documentElement.style.overflow = "hidden";
-    let ready = false;
+    let ready = document.documentElement.dataset.sceneReady === "1";
     const onReady = () => (ready = true);
     window.addEventListener("fieldscene:ready", onReady);
 
